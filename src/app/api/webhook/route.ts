@@ -261,20 +261,6 @@ export async function POST(req: NextRequest) {
           );
         }
       }
-      if (event.type === "message" && event.message.type === "text") {
-        // กรณี Rich Menu ส่ง Action เป็น Message
-        // const userText = event.message.text;
-
-        return client.replyMessage({
-          replyToken: event.replyToken,
-          messages: [
-            {
-              type: "text",
-              text: `P KUNG SO HANDSOME AND SMART MAK MAK KUB JUB JUB`,
-            },
-          ],
-        });
-      }
 
       if (event.type === "postback") {
         // กรณี Rich Menu ส่ง Action เป็น Postback (นิยมใช้ส่งค่า ID/Data)
