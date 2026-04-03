@@ -8,10 +8,10 @@ import Map, {
 } from "react-map-gl/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Search, Filter, ChevronUp } from "lucide-react";
-import StationCard from "@/components/fuel/StationCard";
-import StationDrawer from "@/components/fuel/StationDrawer";
-import StationListSheet from "@/components/fuel/StationListSheet";
-import FilterSheet from "@/components/fuel/FilterSheet";
+import StationCard from "@/components/fuel/map/StationCard";
+import StationDrawer from "@/components/fuel/map/StationDrawer";
+import StationListSheet from "@/components/fuel/map/StationListSheet";
+import FilterSheet from "@/components/fuel/map/FilterSheet";
 import { fetchNearbyStations } from "@/services/thunder-core";
 import { Station, FuelStatus, FilterState } from "@/types/fuel";
 
