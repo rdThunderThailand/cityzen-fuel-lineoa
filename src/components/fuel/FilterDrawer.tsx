@@ -1,10 +1,6 @@
 import { X } from "lucide-react";
 import { Drawer } from "vaul";
-
-interface FilterDrawerProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
+import { FilterDrawerProps, FilterSectionProps } from "@/types/fuel";
 
 export default function FilterDrawer({
   open,
@@ -60,11 +56,6 @@ export default function FilterDrawer({
   );
 }
 
-interface FilterSectionProps {
-  title: string;
-  options: string[];
-  isStatus?: boolean;
-}
 
 function FilterSection({ title, options }: FilterSectionProps) {
   return (

@@ -13,3 +13,47 @@ export interface Station {
   updated_at: string;
   fuels: string[]; // เช่น ['ดีเซล', '95']
 }
+
+export interface FilterState {
+  fuels: string[];
+  statuses: string[];
+  distance: number;
+}
+
+export interface FilterSheetProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  filters: FilterState;
+  onApply: (filters: FilterState) => void;
+}
+
+export interface FilterDrawerProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export interface FilterSectionProps {
+  title: string;
+  options: string[];
+  isStatus?: boolean;
+}
+
+export interface StationCardProps {
+  station: Station;
+  onDetail?: () => void;
+  onReport?: () => void;
+}
+
+export interface StationDrawerProps {
+  station: Station | null;
+  mode?: "detail" | "report";
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export interface StationListSheetProps {
+  stations: Station[];
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSelectStation: (station: Station) => void;
+}

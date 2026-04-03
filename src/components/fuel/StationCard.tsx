@@ -1,7 +1,7 @@
 "use client";
 
 import { Navigation, MapPin, Clock, FileText, MessageSquare } from "lucide-react";
-import type { Station, FuelStatus } from "@/types/fuel";
+import type { FuelStatus, StationCardProps } from "@/types/fuel";
 
 /* ── Status helpers ─────────────────────────────── */
 const STATUS_MAP: Record<FuelStatus, { label: string; color: string; bg: string; dot: string }> = {
@@ -25,12 +25,6 @@ function timeAgo(dateStr: string) {
   return `${hrs} ชั่วโมงที่แล้ว`;
 }
 
-/* ── Props ──────────────────────────────────────── */
-interface StationCardProps {
-  station: Station;
-  onDetail?: () => void;
-  onReport?: () => void;
-}
 
 /* ── Component ──────────────────────────────────── */
 export default function StationCard({ station, onDetail, onReport }: StationCardProps) {
@@ -83,35 +77,35 @@ export default function StationCard({ station, onDetail, onReport }: StationCard
       </div>
 
       {/* ── Action buttons ── */}
-      <div className="px-4 pb-4 pt-2 flex gap-2">
-        {/* Navigate */}
-        <a
-          href={navUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex-1 flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-white text-sm font-bold py-3 rounded-2xl transition-colors"
-        >
-          <Navigation size={16} />
-          นำทาง
-        </a>
-
-        {/* Detail */}
-        {onDetail && (
-          <button
-            onClick={onDetail}
-            className="flex items-center justify-center gap-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-bold px-4 py-3 rounded-2xl transition-colors"
+      <div className="px-4 pb-4 pt-2 flex flex-col gap-2">
+        <div className="flex gap-2">
+          {onDetail && (
+            <button
+              onClick={onDetail}
+              className="flex-1 flex items-center justify-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-bold px-4 py-3 rounded-2xl transition-colors"
+            >
+              <FileText size={16} />
+              ดูรายละเอียด
+            </button>
+          )}
+          <a
+            href={navUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-white text-sm font-bold py-3 rounded-2xl transition-colors"
           >
-            <FileText size={16} />
-          </button>
-        )}
-
-        {/* Report */}
+            <Navigation size={16} />
+            นำทาง
+          </a>
+        </div>
+        
         {onReport && (
           <button
             onClick={onReport}
-            className="flex items-center justify-center gap-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-bold px-4 py-3 rounded-2xl transition-colors"
+            className="w-full flex items-center justify-center gap-1.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-600 text-sm font-bold py-2.5 rounded-2xl transition-colors"
           >
             <MessageSquare size={16} />
+            แจ้งอัปเดต
           </button>
         )}
       </div>
