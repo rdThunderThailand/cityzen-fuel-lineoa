@@ -60,6 +60,7 @@ export function ScreenReview({ data, onSubmit }: any) {
             <Image
               src={URL.createObjectURL(data.image)}
               className="w-full h-32 object-cover rounded-2xl"
+              alt="Evidence"
               width={10}
               height={10}
             />
