@@ -270,7 +270,7 @@ export async function POST(req: NextRequest) {
           messages: [
             {
               type: "text",
-              text: `ตุ๋ยดุ่ย`,
+              text: `P KUNG SO HANDSOME AND SMART MAK MAK KUB JUB JUB`,
             },
           ],
         });
