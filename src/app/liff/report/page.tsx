@@ -1,7 +1,10 @@
 // src/app/liff/report/page.tsx
 "use client";
+import { ScreenEvidence } from "@/components/fuel/report/ScreenEvidence";
+import { ScreenReview } from "@/components/fuel/report/ScreenReview";
 import { ScreenSelectStation } from "@/components/fuel/report/ScreenSelectStation";
 import { ScreenStatusSelection } from "@/components/fuel/report/ScreenStatusSelection";
+import { ScreenSuccess } from "@/components/fuel/report/ScreenSuccess";
 import { fetchNearbyStations } from "@/services/thunder-core";
 import { Station } from "@/types/fuel";
 import { ChevronLeft } from "lucide-react";
@@ -82,7 +85,7 @@ export default function ReportPage() {
             onNext={nextStep}
           />
         )}
-        {/* {step === 3 && (
+        {step === 3 && (
           <ScreenEvidence
             data={reportData}
             setData={setReportData}
@@ -90,7 +93,7 @@ export default function ReportPage() {
           />
         )}
         {step === 4 && <ScreenReview data={reportData} onSubmit={nextStep} />}
-        {step === 5 && <ScreenSuccess />} */}
+        {step === 5 && <ScreenSuccess />}
       </div>
     </main>
   );
