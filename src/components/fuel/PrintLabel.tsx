@@ -7,7 +7,7 @@ interface PrintLabelProps {
 
 export function PrintLabel({ stationCode, stationName }: PrintLabelProps) {
   // Construct dynamic URL based on the concept
-  const baseUrl = "https://cityzen-core.com/r/";
+  const baseUrl = "https://thundercore.vercel.app/r/";
   const qrTextLink = baseUrl + stationCode;
 
   return (
