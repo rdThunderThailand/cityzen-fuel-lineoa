@@ -1,5 +1,4 @@
 import Image from "next/image";
-import React from "react";
 
 interface PrintLabelProps {
   stationCode: string; // The ID or code of the station
@@ -22,6 +21,8 @@ export function PrintLabel({ stationCode, stationName }: PrintLabelProps) {
         <Image
           src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrTextLink)}`}
           alt={`QR Code for ${stationCode}`}
+          width={300}
+          height={300}
           className="w-48 h-48 rounded-xl object-contain mix-blend-multiply"
           loading="lazy"
         />
