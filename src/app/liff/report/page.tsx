@@ -43,58 +43,86 @@ export default function ReportPage() {
   const prevStep = () => setStep((prev) => (prev - 1) as ReportStep);
 
   return (
-    <main className="min-h-screen bg-gray-50 pb-10">
-      {/* Header & Progress Bar */}
-      <header className="bg-white px-4 pt-6 pb-4 sticky top-0 z-10 border-b border-gray-100">
-        <div className="flex items-center justify-between mb-4">
-          {step > 1 && step < 5 ? (
-            <button onClick={prevStep} className="p-2 -ml-2 text-gray-400">
-              <ChevronLeft />
-            </button>
-          ) : (
-            <div className="w-10" />
-          )}
-          <h1 className="text-lg font-bold text-gray-900">แจ้งสถานการณ์ปั๊ม</h1>
-          <div className="w-10" />
-        </div>
-        {step < 5 && (
-          <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-blue-600 transition-all duration-300"
-              style={{ width: `${(step / 4) * 100}%` }}
-            />
-          </div>
-        )}
-      </header>
+    // <main className="min-h-screen bg-gray-50 pb-10">
+    //   {/* Header & Progress Bar */}
+    //   <header className="bg-white px-4 pt-6 pb-4 sticky top-0 z-10 border-b border-gray-100">
+    //     <div className="flex items-center justify-between mb-4">
+    //       {step > 1 && step < 5 ? (
+    //         <button onClick={prevStep} className="p-2 -ml-2 text-gray-400">
+    //           <ChevronLeft />
+    //         </button>
+    //       ) : (
+    //         <div className="w-10" />
+    //       )}
+    //       <h1 className="text-lg font-bold text-gray-900">แจ้งสถานการณ์ปั๊ม</h1>
+    //       <div className="w-10" />
+    //     </div>
+    //     {step < 5 && (
+    //       <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+    //         <div
+    //           className="h-full bg-blue-600 transition-all duration-300"
+    //           style={{ width: `${(step / 4) * 100}%` }}
+    //         />
+    //       </div>
+    //     )}
+    //   </header>
 
-      <div className="p-4">
-        {step === 1 && (
-          <ScreenSelectStation
-            stations={nearbyStations}
-            loading={loading}
-            onSelect={(s: Station) => {
-              setReportData({ ...reportData, station: s });
-              nextStep();
-            }}
-          />
-        )}
-        {step === 2 && (
-          <ScreenStatusSelection
-            data={reportData}
-            setData={setReportData}
-            onNext={nextStep}
-          />
-        )}
-        {step === 3 && (
-          <ScreenEvidence
-            data={reportData}
-            setData={setReportData}
-            onNext={nextStep}
-          />
-        )}
-        {step === 4 && <ScreenReview data={reportData} onSubmit={nextStep} />}
-        {step === 5 && <ScreenSuccess />}
-      </div>
-    </main>
+    //   <div className="p-4">
+    //     {step === 1 && (
+    //       <ScreenSelectStation
+    //         stations={nearbyStations}
+    //         loading={loading}
+    //         onSelect={(s: Station) => {
+    //           setReportData({ ...reportData, station: s });
+    //           nextStep();
+    //         }}
+    //       />
+    //     )}
+    //     {step === 2 && (
+    //       <ScreenStatusSelection
+    //         data={reportData}
+    //         setData={setReportData}
+    //         onNext={nextStep}
+    //       />
+    //     )}
+    //     {step === 3 && (
+    //       <ScreenEvidence
+    //         data={reportData}
+    //         setData={setReportData}
+    //         onNext={nextStep}
+    //       />
+    //     )}
+    //     {step === 4 && <ScreenReview data={reportData} onSubmit={nextStep} />}
+    //     {step === 5 && <ScreenSuccess />}
+    //   </div>
+    // </main>
+    <div>
+      {step === 1 && (
+        <ScreenSelectStation
+          stations={nearbyStations}
+          loading={loading}
+          onSelect={(s: Station) => {
+            // 🚀 แทนที่จะทำ nextStep() ให้ทำการ Redirect ไปเลย
+            const targetUrl = `https://thundercore.vercel.app/r/${s.id}`;
+
+            // เลือกใช้แบบใดแบบหนึ่งครับ:
+
+            // แบบที่ 1: เปลี่ยนหน้าใน LIFF เลย (หน้าเว็บเดิมจะหายไป กลายเป็นเว็บใหม่)
+            window.location.href = targetUrl;
+
+            // หรือ แบบที่ 2: ถ้าอยากให้เปิดใน Browser ภายนอก (ต้องเช็คก่อนว่ารันใน LINE ไหม)
+            /* if (typeof window !== "undefined" && (window as any).liff?.isInClient()) {
+        (window as any).liff.openWindow({
+          url: targetUrl,
+          external: true
+        });
+      } else {
+        window.location.href = targetUrl;
+      }
+      */
+          }}
+        />
+      )}
+    </div>
   );
 }
