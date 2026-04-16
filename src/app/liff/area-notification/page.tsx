@@ -10,6 +10,8 @@ import {
   ChevronRight,
   X,
   Search,
+  ChevronLeft,
+  Car,
 } from "lucide-react";
 
 export default function AlertSettingsPage() {
@@ -19,85 +21,84 @@ export default function AlertSettingsPage() {
     <main className="min-h-screen bg-gray-50 pb-20">
       {/* Screen 1: Main Alert Settings */}
       {step === 1 && (
-        <div className="animate-in fade-in duration-300">
-          <header className="bg-white px-6 pt-8 pb-6 border-b border-gray-100">
-            <h1 className="text-xl font-black text-gray-900 flex items-center gap-2">
-              <Bell className="text-blue-600" fill="currentColor" size={24} />{" "}
-              แจ้งเตือนพื้นที่ของคุณ
+        <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
+          {/* --- Header --- */}
+          <header className="bg-white border-b border-gray-100 px-4 py-4 flex items-center sticky top-0 z-10">
+            <button className="p-2 -ml-2 text-gray-400">
+              <ChevronLeft size={24} />
+            </button>
+            <h1 className="flex-1 text-center text-lg font-bold text-gray-800 mr-8">
+              แจ้งเตือนพื้นที่
             </h1>
           </header>
 
-          <div className="p-4 space-y-6">
-            {/* พื้นที่ของคุณ Card */}
-            <section className="space-y-3">
-              <div className="flex justify-between items-end px-2">
-                <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-                  📍 พื้นที่ของคุณ
-                </h2>
-                <button
-                  onClick={() => setStep(2)}
-                  className="text-blue-600 text-xs font-bold flex items-center gap-1"
-                >
-                  <Plus size={14} /> เพิ่มพื้นที่
-                </button>
-              </div>
-              <div className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 flex justify-between items-center group active:scale-95 transition">
-                <div>
-                  <p className="font-bold text-gray-800">เทศบาลหนองปรือ</p>
-                  <p className="text-xs text-gray-400">อำเภอเมืองชลบุรี</p>
+          {/* --- Body Content --- */}
+          <div className="p-4 space-y-4">
+            {/* Card 1: การตั้งค่าแจ้งเตือน */}
+            <div className="bg-white rounded-3xl shadow-sm border border-gray-50 overflow-hidden">
+              <div className="p-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="bg-slate-100 p-1.5 rounded-lg text-slate-700">
+                    <Bell size={18} fill="currentColor" />
+                  </div>
+                  <span className="text-sm font-bold text-gray-700">
+                    การตั้งค่าแจ้งเตือน
+                  </span>
                 </div>
-                <ChevronRight className="text-gray-300" />
-              </div>
-            </section>
 
-            {/* เส้นทางประจำ Card */}
-            <section className="space-y-3">
-              <div className="flex justify-between items-end px-2">
-                <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-                  🚗 เส้นทางประจำ
-                </h2>
-                <button
-                  onClick={() => setStep(3)}
-                  className="text-blue-600 text-xs font-bold flex items-center gap-1"
-                >
-                  <Plus size={14} /> เพิ่มเส้นทาง
-                </button>
-              </div>
-              <div className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4 border-dashed">
-                <div className="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center text-gray-300">
-                  <MapIcon size={20} />
-                </div>
-                <p className="text-sm font-bold text-gray-300 italic">
-                  ยังไม่มีเส้นทางที่บันทึกไว้
-                </p>
-              </div>
-            </section>
-
-            {/* การตั้งค่าความถี่ Card */}
-            <section className="space-y-3">
-              <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest px-2">
-                ⚙️ การตั้งค่าแจ้งเตือน
-              </h2>
-              <button
-                onClick={() => setStep(4)}
-                className="w-full bg-white p-5 rounded-3xl shadow-sm border border-gray-100 flex justify-between items-center active:bg-gray-50 transition"
-              >
-                <div className="flex items-center gap-3">
-                  <Settings className="text-gray-400" size={18} />
-                  <div className="text-left">
-                    <p className="text-sm font-bold text-gray-800">
-                      ความถี่: ปกติ
-                    </p>
-                    <p className="text-[10px] text-gray-400">
-                      06:00 - 22:00 น.
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h3 className="text-lg font-black text-gray-900">
+                      ความถี่: อัปเดตบ่อย
+                    </h3>
+                    <p className="text-sm text-gray-400 mt-1">
+                      เวลา: 06:00 - 22:00
                     </p>
                   </div>
+                  <button className="bg-[#304052] text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md active:scale-95 transition-transform">
+                    ปรับการตั้งค่า
+                  </button>
                 </div>
-                <div className="px-3 py-1 bg-gray-100 rounded-lg text-[10px] font-bold text-gray-500 uppercase">
-                  ปรับปรุง
+              </div>
+            </div>
+
+            {/* Card 2: พื้นที่ของคุณ */}
+            <div className="bg-white rounded-3xl shadow-sm border border-gray-50 overflow-hidden">
+              <div className="p-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="bg-slate-100 p-1.5 rounded-lg text-slate-700">
+                    <MapPin size={18} fill="currentColor" />
+                  </div>
+                  <span className="text-sm font-bold text-gray-700">
+                    พื้นที่ของคุณ
+                  </span>
                 </div>
-              </button>
-            </section>
+
+                <button className="w-full py-4 border-2 border-dashed border-blue-200 rounded-2xl flex items-center justify-center gap-2 text-blue-500 font-bold text-sm bg-blue-50/30 hover:bg-blue-50 transition-colors active:scale-[0.98]">
+                  <Plus size={18} strokeWidth={3} />
+                  เพิ่มพื้นที่
+                </button>
+              </div>
+            </div>
+
+            {/* Card 3: เส้นทางประจำ */}
+            <div className="bg-white rounded-3xl shadow-sm border border-gray-50 overflow-hidden">
+              <div className="p-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="bg-slate-100 p-1.5 rounded-lg text-slate-700">
+                    <Car size={18} fill="currentColor" />
+                  </div>
+                  <span className="text-sm font-bold text-gray-700">
+                    เส้นทางประจำ
+                  </span>
+                </div>
+
+                <button className="w-full py-4 border-2 border-dashed border-blue-200 rounded-2xl flex items-center justify-center gap-2 text-blue-500 font-bold text-sm bg-blue-50/30 hover:bg-blue-50 transition-colors active:scale-[0.98]">
+                  <Plus size={18} strokeWidth={3} />
+                  เพิ่มเส้นทางประจำ
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
