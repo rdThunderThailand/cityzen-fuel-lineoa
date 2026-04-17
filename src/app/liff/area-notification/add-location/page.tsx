@@ -4,6 +4,7 @@ import { ChevronLeft, Search, MapPin, Check, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { reportDb } from "@/lib/supabase";
+import liff from "@line/liff";
 // นำเข้า Service ที่เราเขียนเพิ่มไว้ใน thunder-core.ts
 import {
   fetchProvincesFromStations,
@@ -64,38 +65,34 @@ export default function AddLocationPage() {
     if (!selectedProvince || !selectedDistrict) return;
 
     try {
-      // 1. ดึง LINE Profile (เพื่อเอา userId)
-      let userId = "mock-user-id"; // ค่า default สำหรับทดสอบตอนยังไม่รันใน LIFF จริง
+      // 🚀 1. ตรวจสอบและ Initialize LIFF ก่อน
+      if (!liff.isLoggedIn()) {
+        await liff.init({ liffId: process.env.NEXT_PUBLIC_LIFF_ID as string });
 
-      // เซฟเช็คว่า liff มีอยู่จริงบน window และถูก init แล้ว
-      const liff = typeof window !== "undefined" ? (window as any).liff : undefined;
-      
-      if (liff && liff.isInClient && liff.getProfile) {
-        try {
-          const profile = await liff.getProfile();
-          userId = profile.userId;
-        } catch (liffError) {
-          console.warn("ไม่สามารถดึงข้อมูล liff profile ได้ ใช้ mock userId ไปก่อน", liffError);
+        // ถ้ายังไม่ Login ให้สั่ง Login ก่อน (กันเหนียว)
+        if (!liff.isLoggedIn()) {
+          liff.login();
+          return;
         }
-      } else {
-        console.warn("ไม่พบ window.liff หรือ liff ไปยังไม่ถูก init. ใช้ mock userId ไปก่อน สำหรับทดสอบ");
       }
 
-      // 2. บันทึกลง Supabase (Alert DB)
+      // 🚀 2. ดึง Profile หลังจากมั่นใจว่า Init แล้ว
+      const profile = await liff.getProfile();
+      const userId = profile.userId;
+
+      // 3. บันทึกลง Supabase (Alert DB)
       const { error } = await reportDb.from("user_subscriptions").insert({
         user_id: userId,
-        location_name: selectedDistrict, // อำเภอ/เทศบาล
-        district_name: selectedProvince, // จังหวัด
-        alert_types: ["fuel", "emergency"], // ค่าเริ่มต้นตามสเปค
+        location_name: selectedDistrict,
+        district_name: selectedProvince,
+        alert_types: ["fuel", "emergency"],
       });
 
       if (error) throw error;
-
-      // 3. เมื่อสำเร็จ ดีดกลับหน้าหลัก
       router.push("/liff/area-notification");
     } catch (err) {
       console.error("บันทึกไม่สำเร็จ:", err);
-      alert("ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง");
+      alert("Error: กรุณาเปิดผ่านแอป LINE หรือเช็คการตั้งค่า LIFF ID");
     }
   };
 
