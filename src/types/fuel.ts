@@ -4,6 +4,8 @@ export interface Station {
   id: string;
   name: string;
   brand: string;
+  province?: string;
+  district?: string;
   address: string;
   latitude: number;
   longitude: number;
