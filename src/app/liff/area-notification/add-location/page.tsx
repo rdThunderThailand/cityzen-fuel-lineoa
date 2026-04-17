@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { ChevronLeft, Search, MapPin, Check, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { reportDb } from "@/lib/supabase";
 // นำเข้า Service ที่เราเขียนเพิ่มไว้ใน thunder-core.ts
 import {
   fetchProvincesFromStations,
@@ -59,27 +60,31 @@ export default function AddLocationPage() {
     item.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  const handleConfirm = () => {
-    // 1. ดึงข้อมูลเก่ามาก่อน
-    const existing = JSON.parse(
-      localStorage.getItem("cityzen_saved_locations") || "[]",
-    );
+  const handleConfirm = async () => {
+    if (!selectedProvince || !selectedDistrict) return;
 
-    // 2. เพิ่มข้อมูลใหม่เข้าไป
-    const newLocation = {
-      id: Date.now().toString(),
-      province: selectedProvince, // "จังหวัดชลบุรี"
-      district: selectedDistrict, // "อำเภอเมืองชลบุรี"
-      alertType: "เหตุฉุกเฉิน",
-    };
+    try {
+      // 1. ดึง LINE Profile (เพื่อเอา userId)
 
-    const updated = [...existing, newLocation];
+      const profile = await window.liff.getProfile();
+      const userId = profile.userId;
 
-    // 3. เซฟลงเครื่อง
-    localStorage.setItem("cityzen_saved_locations", JSON.stringify(updated));
+      // 2. บันทึกลง Supabase (Alert DB)
+      const { error } = await reportDb.from("user_subscriptions").insert({
+        user_id: userId,
+        location_name: selectedDistrict, // อำเภอ/เทศบาล
+        district_name: selectedProvince, // จังหวัด
+        alert_types: ["fuel", "emergency"], // ค่าเริ่มต้นตามสเปค
+      });
 
-    // 4. ดีดกลับหน้าหลัก
-    router.push("/liff/area-notification");
+      if (error) throw error;
+
+      // 3. เมื่อสำเร็จ ดีดกลับหน้าหลัก
+      router.push("/liff/area-notification");
+    } catch (err) {
+      console.error("บันทึกไม่สำเร็จ:", err);
+      alert("ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง");
+    }
   };
 
   return (
