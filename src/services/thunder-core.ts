@@ -83,3 +83,70 @@ function calculateDistance(
 
   return R * c;
 }
+
+// ฟังก์ชันสำหรับดึง "จังหวัด" ทั้งหมดที่มีปั๊มตั้งอยู่ (Unique Provinces)
+export async function fetchProvincesFromStations(): Promise<string[]> {
+  try {
+    const stations = await fetchAllStationsForMapping();
+    // ดึงเฉพาะชื่อจังหวัด, ตัดค่าว่างออก และทำให้เหลือแต่ค่าที่ไม่ซ้ำกัน
+    const provinces = stations
+      .map((s) => s.province)
+      .filter((p): p is string => !!p);
+
+    return Array.from(new Set(provinces)).sort();
+  } catch (error) {
+    console.error("Failed to fetch provinces from stations:", error);
+    return [];
+  }
+}
+
+// ฟังก์ชันสำหรับดึง "อำเภอ" ทั้งหมดในจังหวัดที่เลือก (Unique Districts)
+export async function fetchDistrictsFromStations(
+  provinceName: string,
+): Promise<string[]> {
+  try {
+    const stations = await fetchAllStationsForMapping();
+    // กรองเอาเฉพาะปั๊มในจังหวัดที่เลือก และดึงชื่ออำเภอที่ไม่ซ้ำกัน
+    const districts = stations
+      .filter((s) => s.province === provinceName)
+      .map((s) => s.district)
+      .filter((d): d is string => !!d);
+
+    return Array.from(new Set(districts)).sort();
+  } catch (error) {
+    console.error("Failed to fetch districts from stations:", error);
+    return [];
+  }
+}
+
+/**
+ * Helper: ฟังก์ชันกลางสำหรับดึงสถานีทั้งหมด
+ * (ใช้ Logic เดียวกับพี่บอสคือแยก Client/Server เพื่อความปลอดภัย)
+ */
+async function fetchAllStationsForMapping(): Promise<Station[]> {
+  if (typeof window !== "undefined") {
+    // Client-side: เรียกผ่าน API Route ของเราเอง (พิกัดไม่ต้องใส่เพราะเราเอาทั้งหมดมา Map)
+    const response = await fetch(`/api/stations`);
+    if (!response.ok) throw new Error(`API Error: ${response.status}`);
+    const json = await response.json();
+    return json.data || [];
+  } else {
+    // Server-side: เรียกตรงหา Thunder Core
+    const baseUrl = process.env.THUNDER_CORE_BASE_URL;
+    const apiKey = process.env.THUNDER_CORE_API_KEY;
+    const url = `${baseUrl}/api/fuel/stations`;
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey || "",
+      },
+    });
+
+    if (!response.ok)
+      throw new Error(`Thunder Core API Error: ${response.status}`);
+    const json = await response.json();
+    return json.data || [];
+  }
+}
