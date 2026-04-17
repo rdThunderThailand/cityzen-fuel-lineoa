@@ -65,9 +65,21 @@ export default function AddLocationPage() {
 
     try {
       // 1. ดึง LINE Profile (เพื่อเอา userId)
+      let userId = "mock-user-id"; // ค่า default สำหรับทดสอบตอนยังไม่รันใน LIFF จริง
 
-      const profile = await window.liff.getProfile();
-      const userId = profile.userId;
+      // เซฟเช็คว่า liff มีอยู่จริงบน window และถูก init แล้ว
+      const liff = typeof window !== "undefined" ? (window as any).liff : undefined;
+      
+      if (liff && liff.isInClient && liff.getProfile) {
+        try {
+          const profile = await liff.getProfile();
+          userId = profile.userId;
+        } catch (liffError) {
+          console.warn("ไม่สามารถดึงข้อมูล liff profile ได้ ใช้ mock userId ไปก่อน", liffError);
+        }
+      } else {
+        console.warn("ไม่พบ window.liff หรือ liff ไปยังไม่ถูก init. ใช้ mock userId ไปก่อน สำหรับทดสอบ");
+      }
 
       // 2. บันทึกลง Supabase (Alert DB)
       const { error } = await reportDb.from("user_subscriptions").insert({
