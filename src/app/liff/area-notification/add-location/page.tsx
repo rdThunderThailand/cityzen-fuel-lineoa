@@ -66,15 +66,22 @@ export default function AddLocationPage() {
 
     try {
       // 🚀 1. ตรวจสอบและ Initialize LIFF ก่อน
+      const liffId = process.env.NEXT_PUBLIC_LINE_LIFF_ID;
+      if (!liffId) {
+        throw new Error("NEXT_PUBLIC_LINE_LIFF_ID is not configured.");
+      }
+
+      try {
+        await liff.init({ liffId });
+      } catch (initErr: any) {
+        console.error("LIFF Init Error:", initErr);
+        throw new Error(`LIFF Init Failed: ${initErr.message || initErr}`);
+      }
+
+      // ถ้ายังไม่ Login ให้สั่ง Login ก่อน (กันเหนียว)
       if (!liff.isLoggedIn()) {
-        await liff.init({
-          liffId: process.env.NEXT_PUBLIC_LINE_LIFF_ID as string,
-        });
-        // ถ้ายังไม่ Login ให้สั่ง Login ก่อน (กันเหนียว)
-        if (!liff.isLoggedIn()) {
-          liff.login();
-          return;
-        }
+        liff.login({ redirectUri: window.location.href });
+        return;
       }
 
       // 🚀 2. ดึง Profile หลังจากมั่นใจว่า Init แล้ว
@@ -91,9 +98,10 @@ export default function AddLocationPage() {
 
       if (error) throw error;
       router.push("/liff/area-notification");
-    } catch (err) {
+    } catch (err: any) {
       console.error("บันทึกไม่สำเร็จ:", err);
-      alert("Error: กรุณาเปิดผ่านแอป LINE หรือเช็คการตั้งค่า LIFF ID");
+      const errMsg = err?.message || String(err);
+      alert(`Error: ${errMsg}\n\nกรุณาตรวจสอบหน้าตั้งค่า Environment Variables บน Vercel หรือการโหลด LIFF`);
     }
   };
 
