@@ -67,7 +67,7 @@ export default function AddLocationPage() {
     try {
       // 🚀 1. ตรวจสอบและ Initialize LIFF ก่อน
       if (!liff.isLoggedIn()) {
-        await liff.init({ liffId: process.env.NEXT_PUBLIC_LIFF_ID as string });
+        await liff.init({ liffId: process.env.LINE_LIFF_ID as string });
 
         // ถ้ายังไม่ Login ให้สั่ง Login ก่อน (กันเหนียว)
         if (!liff.isLoggedIn()) {
