@@ -1,7 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { ChevronLeft, Bell, MapPin, Car, Plus, Trash2 } from "lucide-react";
+import { ChevronLeft, Bell, MapPin, Car, Plus, Trash2, AlertCircle } from "lucide-react";
 import Link from "next/link";
+import liff from "@line/liff";
 
 // สร้าง Interface สำหรับข้อมูลพื้นที่
 interface SavedLocation {
@@ -14,6 +15,27 @@ interface SavedLocation {
 export default function AlertMainPage() {
   const [savedLocations, setSavedLocations] = useState<SavedLocation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [liffInitError, setLiffInitError] = useState<string | null>(null);
+
+  // 1. Initialize LIFF & Login
+  useEffect(() => {
+    const initLiff = async () => {
+      try {
+        const liffId = process.env.NEXT_PUBLIC_LINE_LIFF_ID;
+        if (!liffId) throw new Error("NEXT_PUBLIC_LINE_LIFF_ID is not configured");
+
+        await liff.init({ liffId });
+
+        if (!liff.isLoggedIn()) {
+          liff.login({ redirectUri: window.location.href });
+        }
+      } catch (err: any) {
+        console.error("LIFF Init Error:", err);
+        setLiffInitError(err.message || String(err));
+      }
+    };
+    initLiff();
+  }, []);
 
   // 1. ดึงข้อมูลจาก LocalStorage (ที่เซฟมาจากหน้า Add Location)
   useEffect(() => {
@@ -49,6 +71,17 @@ export default function AlertMainPage() {
           แจ้งเตือนพื้นที่
         </h1>
       </header>
+
+      {/* Show LIFF initialization error if any */}
+      {liffInitError && (
+        <div className="m-4 p-4 bg-red-50 rounded-2xl flex items-start gap-3 border border-red-100">
+          <AlertCircle className="text-red-500 shrink-0 mt-0.5" size={20} />
+          <div>
+            <h3 className="text-red-800 font-bold text-sm">ข้อผิดพลาด LIFF</h3>
+            <p className="text-red-600 text-xs mt-1">{liffInitError}</p>
+          </div>
+        </div>
+      )}
 
       <div className="p-4 space-y-6">
         {/* Card 1: การตั้งค่าแจ้งเตือน */}
