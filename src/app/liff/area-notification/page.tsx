@@ -52,7 +52,7 @@ export default function AlertMainPage() {
 
       <div className="p-4 space-y-6">
         {/* Card 1: การตั้งค่าแจ้งเตือน */}
-        <div className="bg-white rounded-[2rem] shadow-sm border border-gray-50 overflow-hidden">
+        <div className="bg-white rounded-4xl shadow-sm border border-gray-50 overflow-hidden">
           <div className="px-5 py-3 border-b border-gray-50 flex items-center gap-2">
             <Bell size={16} className="text-[#304052]" fill="currentColor" />
             <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
