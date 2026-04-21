@@ -1,6 +1,15 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { ChevronLeft, Bell, MapPin, Car, Plus, Trash2, AlertCircle, Loader2 } from "lucide-react";
+import {
+  ChevronLeft,
+  Bell,
+  MapPin,
+  Car,
+  Plus,
+  Trash2,
+  AlertCircle,
+  Loader2,
+} from "lucide-react";
 import Link from "next/link";
 import liff from "@line/liff";
 import { reportDb } from "@/lib/supabase";
@@ -23,7 +32,8 @@ export default function AlertMainPage() {
     const initLiff = async () => {
       try {
         const liffId = process.env.NEXT_PUBLIC_LINE_LIFF_ID;
-        if (!liffId) throw new Error("NEXT_PUBLIC_LINE_LIFF_ID is not configured");
+        if (!liffId)
+          throw new Error("NEXT_PUBLIC_LINE_LIFF_ID is not configured");
 
         await liff.init({ liffId });
 
@@ -56,7 +66,10 @@ export default function AlertMainPage() {
             id: item.id.toString(),
             province: item.district_name,
             district: item.location_name,
-            alertType: item.alert_types && item.alert_types.length > 0 ? "เหตุฉุกเฉินและอื่นๆ" : "เหตุฉุกเฉิน",
+            alertType:
+              item.alert_types && item.alert_types.length > 0
+                ? "เหตุฉุกเฉินและอื่นๆ"
+                : "เหตุฉุกเฉิน",
           }));
           setSavedLocations(mappedData);
         }
@@ -78,7 +91,7 @@ export default function AlertMainPage() {
         .from("user_subscriptions")
         .delete()
         .eq("id", id);
-        
+
       if (error) throw error;
 
       // อัปเดตใน State ทันที
@@ -97,9 +110,11 @@ export default function AlertMainPage() {
         <Link href="/liff" className="p-2 -ml-2 text-gray-400">
           <ChevronLeft size={24} />
         </Link>
-        <h1 className="flex-1 text-center text-lg font-bold text-gray-800 mr-8">
-          แจ้งเตือนพื้นที่
-        </h1>
+        <Link href="/liff/area-notification/preferences">
+          <h1 className="flex-1 text-center text-lg font-bold text-gray-800 mr-8">
+            แจ้งเตือนพื้นที่
+          </h1>
+        </Link>
       </header>
 
       {/* Show LIFF initialization error if any */}
@@ -158,39 +173,39 @@ export default function AlertMainPage() {
           </Link>
 
           {/* แสดงรายการพื้นที่จริงที่เลือกมา */}
-          {savedLocations.length > 0
-            ? savedLocations.map((loc) => (
-                <div
-                  key={loc.id}
-                  className="mx-1 p-5 bg-white border border-gray-100 rounded-[2rem] shadow-sm flex items-center justify-between animate-in slide-in-from-right-4 duration-300"
-                >
-                  <div className="flex flex-col">
-                    <span className="text-sm font-bold text-gray-800">
-                      {loc.province} &gt; {loc.district}
-                    </span>
-                    <span className="text-xs text-gray-400 mt-1 font-medium">
-                      แจ้งเตือน: {loc.alertType || "เหตุฉุกเฉิน"}
-                    </span>
-                  </div>
+          {savedLocations.length > 0 ? (
+            savedLocations.map((loc) => (
+              <div
+                key={loc.id}
+                className="mx-1 p-5 bg-white border border-gray-100 rounded-[2rem] shadow-sm flex items-center justify-between animate-in slide-in-from-right-4 duration-300"
+              >
+                <div className="flex flex-col">
+                  <span className="text-sm font-bold text-gray-800">
+                    {loc.province} &gt; {loc.district}
+                  </span>
+                  <span className="text-xs text-gray-400 mt-1 font-medium">
+                    แจ้งเตือน: {loc.alertType || "เหตุฉุกเฉิน"}
+                  </span>
+                </div>
 
-                  <button
-                    onClick={() => handleDelete(loc.id)}
-                    className="p-3 bg-[#EBF5FF] text-[#3B82F6] rounded-xl active:scale-90 transition-transform"
-                  >
-                    <Trash2 size={20} />
-                  </button>
-                </div>
-              ))
-            : !loading ? (
-                <div className="text-center py-4 text-gray-300 text-xs italic">
-                  ยังไม่มีพื้นที่ที่ติดตาม
-                </div>
-              ) : (
-                <div className="text-center py-4 flex justify-center items-center gap-2 text-gray-400">
-                  <Loader2 size={16} className="animate-spin text-blue-500" /> 
-                  <span className="text-xs">กำลังค้นหาข้อมูลของคุณ...</span>
-                </div>
-              )}
+                <button
+                  onClick={() => handleDelete(loc.id)}
+                  className="p-3 bg-[#EBF5FF] text-[#3B82F6] rounded-xl active:scale-90 transition-transform"
+                >
+                  <Trash2 size={20} />
+                </button>
+              </div>
+            ))
+          ) : !loading ? (
+            <div className="text-center py-4 text-gray-300 text-xs italic">
+              ยังไม่มีพื้นที่ที่ติดตาม
+            </div>
+          ) : (
+            <div className="text-center py-4 flex justify-center items-center gap-2 text-gray-400">
+              <Loader2 size={16} className="animate-spin text-blue-500" />
+              <span className="text-xs">กำลังค้นหาข้อมูลของคุณ...</span>
+            </div>
+          )}
         </div>
 
         {/* Section: เส้นทางประจำ */}
