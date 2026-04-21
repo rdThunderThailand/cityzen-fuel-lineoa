@@ -231,11 +231,12 @@ export default function AlertMainPage() {
         {/* --- พื้นที่ของคุณ --- */}
         <div className="space-y-3">
           <div className="flex items-center gap-2 px-2">
-            <MapPin size={16} fill="currentColor" />
+            <MapPin size={16} className="text-[#304052]" fill="currentColor" />
             <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
               พื้นที่ของคุณ
             </span>
           </div>
+
           <Link
             href="/liff/area-notification/add-location"
             className="block px-1"
@@ -244,27 +245,39 @@ export default function AlertMainPage() {
               <Plus size={18} strokeWidth={3} /> เพิ่มพื้นที่
             </div>
           </Link>
-          {savedLocations.map((loc) => (
-            <div
-              key={loc.id}
-              className="mx-1 p-5 bg-white border border-gray-100 rounded-[2rem] shadow-sm flex items-center justify-between"
-            >
-              <div className="flex flex-col">
-                <span className="text-sm font-bold text-gray-800">
-                  {loc.province} &gt; {loc.district}
-                </span>
-                <span className="text-xs text-gray-400 mt-1">
-                  แจ้งเตือน: {loc.alertType}
-                </span>
-              </div>
-              <button
-                onClick={() => handleDeleteLocation(loc.id)}
-                className="p-3 bg-[#EBF5FF] text-[#3B82F6] rounded-xl"
-              >
-                <Trash2 size={20} />
-              </button>
+
+          {/* 🎯 จุดที่แก้ไข: เช็ค loading และความยาวของ array */}
+          {loading ? (
+            <div className="flex justify-center py-4">
+              <Loader2 className="animate-spin text-gray-300" size={20} />
             </div>
-          ))}
+          ) : savedLocations.length > 0 ? (
+            savedLocations.map((loc) => (
+              <div
+                key={loc.id}
+                className="mx-1 p-5 bg-white border border-gray-100 rounded-[2rem] shadow-sm flex items-center justify-between"
+              >
+                <div className="flex flex-col">
+                  <span className="text-sm font-bold text-gray-800">
+                    {loc.province} &gt; {loc.district}
+                  </span>
+                  <span className="text-xs text-gray-400 mt-1">
+                    แจ้งเตือน: {loc.alertType}
+                  </span>
+                </div>
+                <button
+                  onClick={() => handleDeleteLocation(loc.id)}
+                  className="p-3 bg-[#EBF5FF] text-[#3B82F6] rounded-xl"
+                >
+                  <Trash2 size={20} />
+                </button>
+              </div>
+            ))
+          ) : (
+            <div className="text-center py-8 bg-white/50 rounded-[2rem] border border-dashed border-gray-200 text-gray-300 text-xs italic mx-1">
+              ยังไม่มีพื้นที่ที่ติดตาม
+            </div>
+          )}
         </div>
 
         {/* --- เส้นทางประจำ (เชื่อม Database แล้ว) --- */}
