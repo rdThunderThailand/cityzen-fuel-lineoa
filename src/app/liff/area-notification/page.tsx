@@ -246,7 +246,6 @@ export default function AlertMainPage() {
             </div>
           </Link>
 
-          {/* 🎯 จุดที่แก้ไข: เช็ค loading และความยาวของ array */}
           {loading ? (
             <div className="flex justify-center py-4">
               <Loader2 className="animate-spin text-gray-300" size={20} />
@@ -297,38 +296,42 @@ export default function AlertMainPage() {
             </div>
           </Link>
 
-          {/* แสดงรายการเส้นทางจริงจาก Database */}
-          {savedRoutes.length > 0
-            ? savedRoutes.map((route) => (
-                <div
-                  key={route.id}
-                  className="mx-1 p-5 bg-white border border-gray-100 rounded-[2rem] shadow-sm flex items-center justify-between animate-in slide-in-from-right-4 duration-300"
-                >
-                  <div className="flex flex-col flex-1 pr-4">
-                    <span className="text-sm font-bold text-gray-800 line-clamp-1">
-                      {route.origin} - {route.destination}
-                    </span>
-                    <span className="text-xs text-gray-400 mt-1 font-medium">
-                      แจ้งเตือน:{" "}
-                      {route.alertOptions.length > 0
-                        ? route.alertOptions.join(", ")
-                        : "ทั่วไป"}
-                    </span>
-                  </div>
+          {/* 🎯 แก้ไขเพิ่มส่วน Loading ให้เหมือนกับพื้นที่ของคุณ */}
+          {loading ? (
+            <div className="flex justify-center py-4">
+              <Loader2 className="animate-spin text-gray-300" size={20} />
+            </div>
+          ) : savedRoutes.length > 0 ? (
+            savedRoutes.map((route) => (
+              <div
+                key={route.id}
+                className="mx-1 p-5 bg-white border border-gray-100 rounded-[2rem] shadow-sm flex items-center justify-between animate-in slide-in-from-right-4 duration-300"
+              >
+                <div className="flex flex-col flex-1 pr-4">
+                  <span className="text-sm font-bold text-gray-800 line-clamp-1">
+                    {route.origin} - {route.destination}
+                  </span>
+                  <span className="text-xs text-gray-400 mt-1 font-medium">
+                    แจ้งเตือน:{" "}
+                    {route.alertOptions.length > 0
+                      ? route.alertOptions.join(", ")
+                      : "ทั่วไป"}
+                  </span>
+                </div>
 
-                  <button
-                    onClick={() => handleDeleteRoute(route.id)}
-                    className="p-3 bg-[#EBF5FF] text-[#3B82F6] rounded-xl active:scale-90 transition-transform"
-                  >
-                    <Trash2 size={20} />
-                  </button>
-                </div>
-              ))
-            : !loading && (
-                <div className="text-center py-4 text-gray-300 text-xs italic">
-                  ยังไม่มีเส้นทางที่บันทึกไว้
-                </div>
-              )}
+                <button
+                  onClick={() => handleDeleteRoute(route.id)}
+                  className="p-3 bg-[#EBF5FF] text-[#3B82F6] rounded-xl active:scale-90 transition-transform"
+                >
+                  <Trash2 size={20} />
+                </button>
+              </div>
+            ))
+          ) : (
+            <div className="text-center py-4 text-gray-300 text-xs italic">
+              ยังไม่มีเส้นทางที่บันทึกไว้
+            </div>
+          )}
         </div>
       </div>
     </div>
