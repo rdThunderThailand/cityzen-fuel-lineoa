@@ -247,11 +247,12 @@ export default function AlertMainPage() {
               เส้นทางประจำ
             </span>
           </div>
-
-          <div className="mx-1 py-4 border-2 border-dashed border-blue-200 rounded-2xl flex items-center justify-center gap-2 text-blue-500 font-bold text-sm bg-blue-50/30">
-            <Plus size={18} strokeWidth={3} />
-            เพิ่มเส้นทางประจำ
-          </div>
+          <Link href="/liff/area-notification/add-route">
+            <div className="mx-1 py-4 border-2 border-dashed border-blue-200 rounded-2xl flex items-center justify-center gap-2 text-blue-500 font-bold text-sm bg-blue-50/30">
+              <Plus size={18} strokeWidth={3} />
+              เพิ่มเส้นทางประจำ
+            </div>
+          </Link>
         </div>
       </div>
     </div>
