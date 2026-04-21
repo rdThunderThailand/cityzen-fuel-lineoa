@@ -144,7 +144,7 @@ export default function AlertMainPage() {
                 เวลา: 06:00 - 22:00
               </p>
             </div>
-            <Link href="liff/area-notification/preferences">
+            <Link href="/liff/area-notification/preferences">
               <button className="bg-[#304052] text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md active:scale-95 transition">
                 ปรับการตั้งค่า
               </button>
