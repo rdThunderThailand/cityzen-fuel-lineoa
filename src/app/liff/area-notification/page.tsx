@@ -281,52 +281,54 @@ export default function AlertMainPage() {
         </div>
 
         {/* --- เส้นทางประจำ (เชื่อม Database แล้ว) --- */}
-        <div className="space-y-3">
+        <div className="space-y-3 pt-2">
           <div className="flex items-center gap-2 px-2">
-            <Car size={16} fill="currentColor" />
+            <Car size={16} className="text-[#304052]" fill="currentColor" />
             <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
               เส้นทางประจำ
             </span>
           </div>
+
+          {/* ปุ่มเพิ่มเส้นทางประจำ */}
           <Link href="/liff/area-notification/add-route" className="block px-1">
             <div className="w-full py-4 border-2 border-dashed border-blue-200 rounded-2xl flex items-center justify-center gap-2 text-blue-500 font-bold text-sm bg-blue-50/30">
-              <Plus size={18} strokeWidth={3} /> เพิ่มเส้นทางประจำ
+              <Plus size={18} strokeWidth={3} />
+              เพิ่มเส้นทางประจำ
             </div>
           </Link>
 
-          {savedRoutes.map((route) => (
-            <div
-              key={route.id}
-              className="mx-1 p-5 bg-white border border-gray-100 rounded-[2rem] shadow-sm flex items-center justify-between animate-in fade-in slide-in-from-right-4"
-            >
-              <div className="flex flex-col flex-1 pr-4">
-                <div className="flex items-center gap-2">
-                  <Navigation size={14} className="text-blue-500" />
-                  <span className="text-sm font-bold text-gray-800 truncate">
-                    {route.origin} - {route.destination}
-                  </span>
-                </div>
-                <span className="text-xs text-gray-400 mt-1 font-medium italic">
-                  รับแจ้ง:{" "}
-                  {route.alertOptions.length > 0
-                    ? route.alertOptions.join(", ")
-                    : "ทั่วไป"}
-                </span>
-              </div>
-              <button
-                onClick={() => handleDeleteRoute(route.id)}
-                className="p-3 bg-[#EBF5FF] text-[#3B82F6] rounded-xl active:scale-90 transition-transform"
-              >
-                <Trash2 size={20} />
-              </button>
-            </div>
-          ))}
+          {/* แสดงรายการเส้นทางจริงจาก Database */}
+          {savedRoutes.length > 0
+            ? savedRoutes.map((route) => (
+                <div
+                  key={route.id}
+                  className="mx-1 p-5 bg-white border border-gray-100 rounded-[2rem] shadow-sm flex items-center justify-between animate-in slide-in-from-right-4 duration-300"
+                >
+                  <div className="flex flex-col flex-1 pr-4">
+                    <span className="text-sm font-bold text-gray-800 line-clamp-1">
+                      {route.origin} - {route.destination}
+                    </span>
+                    <span className="text-xs text-gray-400 mt-1 font-medium">
+                      แจ้งเตือน:{" "}
+                      {route.alertOptions.length > 0
+                        ? route.alertOptions.join(", ")
+                        : "ทั่วไป"}
+                    </span>
+                  </div>
 
-          {!loading && savedRoutes.length === 0 && (
-            <div className="text-center py-4 text-gray-300 text-xs italic">
-              ยังไม่มีเส้นทางที่บันทึกไว้
-            </div>
-          )}
+                  <button
+                    onClick={() => handleDeleteRoute(route.id)}
+                    className="p-3 bg-[#EBF5FF] text-[#3B82F6] rounded-xl active:scale-90 transition-transform"
+                  >
+                    <Trash2 size={20} />
+                  </button>
+                </div>
+              ))
+            : !loading && (
+                <div className="text-center py-4 text-gray-300 text-xs italic">
+                  ยังไม่มีเส้นทางที่บันทึกไว้
+                </div>
+              )}
         </div>
       </div>
     </div>
