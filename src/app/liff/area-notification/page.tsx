@@ -51,22 +51,29 @@ export default function NotificationSettingsPage() {
     try {
       const profile = await liff.getProfile();
 
+      // 🚀 ลองใส่ console.log เช็กค่าก่อนส่ง
+      console.log("Saving for User:", profile.userId);
+
       const { error } = await reportDb.from("user_preferences").upsert({
         user_id: profile.userId,
         frequency: frequency,
-        is_time_restricted: isTimeEnabled,
-        start_time: "06:00", // ค่า default ตาม Figma
+        is_time_restricted: isTimeEnabled, // 🎯 คอลัมน์นี้ต้องมีใน DB
+        start_time: "06:00",
         end_time: "22:00",
         updated_at: new Date(),
       });
 
-      if (error) throw error;
+      if (error) {
+        // 🚨 ถ้า Supabase คืน Error มา ให้โชว์ตรงนี้
+        throw new Error(error.message);
+      }
 
-      alert("บันทึกการตั้งค่าเรียบร้อย!");
+      alert("บันทึกการตั้งค่าเรียบร้อยครับ!");
       router.push("/liff/area-notification");
-    } catch (err) {
+    } catch (err: any) {
       console.error("Save Error:", err);
-      alert("บันทึกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
+      // 💡 โชว์ข้อความ Error จริงๆ ให้พี่เห็นบนจอมือถือ
+      alert(`บันทึกไม่สำเร็จ: ${err.message || "Unknown Error"}`);
     } finally {
       setSaving(false);
     }
