@@ -274,7 +274,7 @@ export default function AlertMainPage() {
               </div>
             ))
           ) : (
-            <div className="text-center py-8 bg-white/50 rounded-[2rem] border border-dashed border-gray-200 text-gray-300 text-xs italic mx-1">
+            <div className="text-center py-4 text-gray-300 text-xs italic">
               ยังไม่มีพื้นที่ที่ติดตาม
             </div>
           )}
