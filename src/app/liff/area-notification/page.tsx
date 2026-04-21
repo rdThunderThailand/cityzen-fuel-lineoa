@@ -110,11 +110,9 @@ export default function AlertMainPage() {
         <Link href="/liff" className="p-2 -ml-2 text-gray-400">
           <ChevronLeft size={24} />
         </Link>
-        <Link href="/liff/area-notification/preferences">
-          <h1 className="flex-1 text-center text-lg font-bold text-gray-800 mr-8">
-            แจ้งเตือนพื้นที่
-          </h1>
-        </Link>
+        <h1 className="flex-1 text-center text-lg font-bold text-gray-800 mr-8">
+          แจ้งเตือนพื้นที่
+        </h1>
       </header>
 
       {/* Show LIFF initialization error if any */}
@@ -146,9 +144,11 @@ export default function AlertMainPage() {
                 เวลา: 06:00 - 22:00
               </p>
             </div>
-            <button className="bg-[#304052] text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md active:scale-95 transition">
-              ปรับการตั้งค่า
-            </button>
+            <Link href="liff/area-notification/preferences">
+              <button className="bg-[#304052] text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md active:scale-95 transition">
+                ปรับการตั้งค่า
+              </button>
+            </Link>
           </div>
         </div>
 
