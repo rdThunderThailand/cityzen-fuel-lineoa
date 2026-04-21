@@ -1,8 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { ChevronLeft, Bell, MapPin, Car, Plus, Trash2, AlertCircle } from "lucide-react";
+import { ChevronLeft, Bell, MapPin, Car, Plus, Trash2, AlertCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
 import liff from "@line/liff";
+import { reportDb } from "@/lib/supabase";
 
 // สร้าง Interface สำหรับข้อมูลพื้นที่
 interface SavedLocation {
@@ -17,7 +18,7 @@ export default function AlertMainPage() {
   const [loading, setLoading] = useState(true);
   const [liffInitError, setLiffInitError] = useState<string | null>(null);
 
-  // 1. Initialize LIFF & Login
+  // 1. Initialize LIFF & Load DB Data
   useEffect(() => {
     const initLiff = async () => {
       try {
@@ -28,36 +29,65 @@ export default function AlertMainPage() {
 
         if (!liff.isLoggedIn()) {
           liff.login({ redirectUri: window.location.href });
+        } else {
+          loadDataFromDB();
         }
       } catch (err: any) {
         console.error("LIFF Init Error:", err);
         setLiffInitError(err.message || String(err));
+        setLoading(false);
       }
     };
+
+    const loadDataFromDB = async () => {
+      try {
+        const profile = await liff.getProfile();
+        const userId = profile.userId;
+
+        const { data, error } = await reportDb
+          .from("user_subscriptions")
+          .select("*")
+          .eq("user_id", userId);
+
+        if (error) throw error;
+
+        if (data) {
+          const mappedData: SavedLocation[] = data.map((item: any) => ({
+            id: item.id.toString(),
+            province: item.district_name,
+            district: item.location_name,
+            alertType: item.alert_types && item.alert_types.length > 0 ? "เหตุฉุกเฉินและอื่นๆ" : "เหตุฉุกเฉิน",
+          }));
+          setSavedLocations(mappedData);
+        }
+      } catch (e) {
+        console.error("Error loading data from DB:", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     initLiff();
   }, []);
 
-  // 1. ดึงข้อมูลจาก LocalStorage (ที่เซฟมาจากหน้า Add Location)
-  useEffect(() => {
-    const loadLocations = () => {
-      const data = localStorage.getItem("cityzen_saved_locations");
-      if (data) {
-        setSavedLocations(JSON.parse(data));
-      }
-      setLoading(false);
-    };
-
-    loadLocations();
-    // ฟังการเปลี่ยนแปลงของ Storage (เผื่อมีการอัปเดตจากหน้าอื่น)
-    window.addEventListener("storage", loadLocations);
-    return () => window.removeEventListener("storage", loadLocations);
-  }, []);
-
   // 2. ฟังก์ชันลบพื้นที่
-  const handleDelete = (id: string) => {
-    const updated = savedLocations.filter((loc) => loc.id !== id);
-    setSavedLocations(updated);
-    localStorage.setItem("cityzen_saved_locations", JSON.stringify(updated));
+  const handleDelete = async (id: string) => {
+    try {
+      // ลบออกจาก Database
+      const { error } = await reportDb
+        .from("user_subscriptions")
+        .delete()
+        .eq("id", id);
+        
+      if (error) throw error;
+
+      // อัปเดตใน State ทันที
+      const updated = savedLocations.filter((loc) => loc.id !== id);
+      setSavedLocations(updated);
+    } catch (err) {
+      console.error("ลบข้อมูลไม่สำเร็จ:", err);
+      alert("ไม่สามารถลบข้อมูลได้ กรุณาลองใหม่อีกครั้ง");
+    }
   };
 
   return (
@@ -151,9 +181,14 @@ export default function AlertMainPage() {
                   </button>
                 </div>
               ))
-            : !loading && (
+            : !loading ? (
                 <div className="text-center py-4 text-gray-300 text-xs italic">
                   ยังไม่มีพื้นที่ที่ติดตาม
+                </div>
+              ) : (
+                <div className="text-center py-4 flex justify-center items-center gap-2 text-gray-400">
+                  <Loader2 size={16} className="animate-spin text-blue-500" /> 
+                  <span className="text-xs">กำลังค้นหาข้อมูลของคุณ...</span>
                 </div>
               )}
         </div>

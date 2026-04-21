@@ -1,13 +1,8 @@
 // src/app/liff/report/page.tsx
 "use client";
-import { ScreenEvidence } from "@/components/fuel/report/ScreenEvidence";
-import { ScreenReview } from "@/components/fuel/report/ScreenReview";
 import { ScreenSelectStation } from "@/components/fuel/report/ScreenSelectStation";
-import { ScreenStatusSelection } from "@/components/fuel/report/ScreenStatusSelection";
-import { ScreenSuccess } from "@/components/fuel/report/ScreenSuccess";
 import { fetchNearbyStations } from "@/services/thunder-core";
 import { Station } from "@/types/fuel";
-import { ChevronLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type ReportStep = 1 | 2 | 3 | 4 | 5;
