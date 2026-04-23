@@ -50,6 +50,12 @@ export default function AlertMainPage() {
     urgent: "เร่งด่วนเท่านั้น",
   };
 
+  const alertLabelMap: Record<string, string> = {
+    fuel: "ราคาน้ำมันตามเส้นทาง",
+    traffic: "อุบัติเหตุ / รถติด",
+    restStop: "จุดพักรถ / ร้านอาหาร",
+  };
+
   useEffect(() => {
     const initLiff = async () => {
       try {
@@ -161,7 +167,7 @@ export default function AlertMainPage() {
     }
   };
 
-  // ฟังก์ชันลบเส้นทาง - เพิ่มตรงนี้
+  // ฟังก์ชันลบเส้นทาง
   const handleDeleteRoute = async (id: string) => {
     if (!confirm("คุณต้องการลบเส้นทางนี้ใช่หรือไม่?")) return;
     try {
@@ -313,8 +319,10 @@ export default function AlertMainPage() {
                   </span>
                   <span className="text-xs text-gray-400 mt-1 font-medium">
                     แจ้งเตือน:{" "}
-                    {route.alertOptions.length > 0
-                      ? route.alertOptions.join(", ")
+                    {route.alertOptions && route.alertOptions.length > 0
+                      ? route.alertOptions
+                          .map((opt) => alertLabelMap[opt] || opt)
+                          .join(", ")
                       : "ทั่วไป"}
                   </span>
                 </div>

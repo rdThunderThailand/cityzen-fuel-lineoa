@@ -118,7 +118,7 @@ export default function AddRoutePage() {
         </div>
 
         {/* --- Section 2: เลือกการแจ้งเตือน --- */}
-        <div className="bg-white rounded-[2rem] shadow-sm border border-gray-50 overflow-hidden">
+        <div className="bg-white rounded-4xl shadow-sm border border-gray-50 overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-50 flex items-center gap-2">
             <Bell size={16} className="text-[#304052]" fill="currentColor" />
             <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
