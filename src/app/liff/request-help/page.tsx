@@ -76,7 +76,6 @@ export default function HelpCategoryPage() {
 
       <div className="flex-1 bg-white mx-3 my-4 rounded-[2rem] p-6 shadow-sm">
         <div className="text-center mb-10">
-          <div className="text-5xl mb-3">❤️</div>
           <h2 className="text-3xl font-black text-gray-900">ขอความช่วยเหลือ</h2>
           <p className="text-gray-500 mt-2 text-sm leading-relaxed">
             เราจะช่วยส่งคำขอของคุณไปยังคนที่ช่วยได้ใกล้คุณ
