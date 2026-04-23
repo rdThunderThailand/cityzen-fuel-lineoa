@@ -28,6 +28,10 @@ export default function AddRoutePage() {
     restStop: false,
   });
 
+  const toggleAlert = (key: keyof typeof alerts) => {
+    setAlerts((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
   const handleSave = async () => {
     if (!origin.address || !dest.address) {
       alert("กรุณาระบุสถานที่ต้นทางและปลายทางครับ");
@@ -86,7 +90,7 @@ export default function AddRoutePage() {
           <div className="space-y-3">
             <input
               type="text"
-              placeholder="ตั้งชื่อสถานที่ (เช่น บ้าน, ออฟฟิศ)"
+              placeholder="ตั้งชื่อสถานที่ (เช่น บ้าน)"
               className="w-full bg-blue-50/50 border-none rounded-xl px-4 py-3 text-sm font-bold text-blue-600 placeholder:text-blue-300 outline-none"
               value={origin.label}
               onChange={(e) => setOrigin({ ...origin, label: e.target.value })}
@@ -121,7 +125,7 @@ export default function AddRoutePage() {
           <div className="space-y-3">
             <input
               type="text"
-              placeholder="ตั้งชื่อสถานที่ (เช่น ม้าบอก, บ้านพ่อ)"
+              placeholder="ตั้งชื่อสถานที่ (เช่น ปั๊มแถวบ้าน)"
               className="w-full bg-red-50/50 border-none rounded-xl px-4 py-3 text-sm font-bold text-red-600 placeholder:text-red-300 outline-none"
               value={dest.label}
               onChange={(e) => setDest({ ...dest, label: e.target.value })}
@@ -142,15 +146,76 @@ export default function AddRoutePage() {
           </div>
         </div>
 
-        {/* --- ส่วนเลือกการแจ้งเตือน --- */}
-        <div className="bg-white rounded-[2rem] shadow-sm border border-gray-50 overflow-hidden pb-4">
-          <div className="px-6 py-4 border-b border-gray-50 flex items-center gap-2 mb-2">
-            <Bell size={16} fill="currentColor" />
-            <span className="text-xs font-bold text-gray-500 uppercase">
+        {/* --- Section 2: เลือกการแจ้งเตือน --- */}
+        <div className="bg-white rounded-4xl shadow-sm border border-gray-50 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-50 flex items-center gap-2">
+            <Bell size={16} className="text-[#304052]" fill="currentColor" />
+            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
               เลือกการแจ้งเตือนบนเส้นทาง
             </span>
           </div>
-          {/* ... (Checkbox List เหมือนเดิมเลยครับพี่) ... */}
+
+          <div className="p-4 space-y-3">
+            {/* Option 1 */}
+            <div
+              onClick={() => toggleAlert("fuel")}
+              className="flex items-center justify-between p-4 border border-gray-50 rounded-2xl bg-white shadow-sm active:bg-gray-50 transition-colors cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <Bell size={18} className="text-[#304052]" />
+                <span className="text-sm font-medium text-gray-700">
+                  ราคาน้ำมันตามเส้นทาง
+                </span>
+              </div>
+              <div
+                className={`w-5 h-5 rounded-md border-2 transition-all flex items-center justify-center ${alerts.fuel ? "bg-blue-500 border-blue-500" : "border-gray-200"}`}
+              >
+                {alerts.fuel && (
+                  <div className="w-2 h-1 border-l-2 border-b-2 border-white -rotate-45 mb-0.5" />
+                )}
+              </div>
+            </div>
+
+            {/* Option 2 */}
+            <div
+              onClick={() => toggleAlert("traffic")}
+              className="flex items-center justify-between p-4 border border-gray-50 rounded-2xl bg-white shadow-sm active:bg-gray-50 transition-colors cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <TriangleAlert size={18} className="text-[#304052]" />
+                <span className="text-sm font-medium text-gray-700">
+                  อุบัติเหตุ / รถติด
+                </span>
+              </div>
+              <div
+                className={`w-5 h-5 rounded-md border-2 transition-all flex items-center justify-center ${alerts.traffic ? "bg-blue-500 border-blue-500" : "border-gray-200"}`}
+              >
+                {alerts.traffic && (
+                  <div className="w-2 h-1 border-l-2 border-b-2 border-white -rotate-45 mb-0.5" />
+                )}
+              </div>
+            </div>
+
+            {/* Option 3 */}
+            <div
+              onClick={() => toggleAlert("restStop")}
+              className="flex items-center justify-between p-4 border border-gray-50 rounded-2xl bg-white shadow-sm active:bg-gray-50 transition-colors cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <Store size={18} className="text-[#304052]" />
+                <span className="text-sm font-medium text-gray-700">
+                  จุดพักรถ / ร้านอาหาร
+                </span>
+              </div>
+              <div
+                className={`w-5 h-5 rounded-md border-2 transition-all flex items-center justify-center ${alerts.restStop ? "bg-blue-500 border-blue-500" : "border-gray-200"}`}
+              >
+                {alerts.restStop && (
+                  <div className="w-2 h-1 border-l-2 border-b-2 border-white -rotate-45 mb-0.5" />
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
