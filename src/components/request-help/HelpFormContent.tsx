@@ -1,8 +1,8 @@
 "use client";
-import { Camera, ChevronLeft, Info, MapPin, Plus } from "lucide-react";
+import { Camera, ChevronLeft, Info, MapPin, Plus, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 export default function HelpFormContent() {
   const searchParams = useSearchParams();
@@ -12,7 +12,33 @@ export default function HelpFormContent() {
   const [details, setDetails] = useState("");
   const [loadingLocation, setLoadingLocation] = useState(true);
   const [address, setAddress] = useState("กำลังดึงพิกัดของคุณ...");
-  const [locationData, setLocationData] = useState<{lat: number, lng: number} | null>(null);
+  const [subLocation, setSubLocation] = useState("พัทยา, ชลบุรี");
+  const [locationData, setLocationData] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
+  
+  const [images, setImages] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const newFiles = Array.from(e.target.files);
+      if (images.length + newFiles.length > 4) {
+        alert("อัพโหลดรูปภาพได้สูงสุด 4 รูปครับ");
+        return;
+      }
+      setImages((prev) => [...prev, ...newFiles]);
+    }
+    // เคลียร์ค่า input เพื่อให้อัพโหลดไฟล์เดิมซ้ำได้ถ้ายกเลิกไป
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
+  };
 
   // Mapping ชื่อประเภท
   const typeMap: Record<string, string> = {
@@ -31,6 +57,9 @@ export default function HelpFormContent() {
       try {
         const data = JSON.parse(saved);
         setAddress(data.address);
+        if (data.subLocation) {
+          setSubLocation(data.subLocation);
+        }
         setLocationData({ lat: data.lat, lng: data.lng });
         setLoadingLocation(false);
         return;
@@ -47,9 +76,10 @@ export default function HelpFormContent() {
   }, []);
 
   const mapboxAccessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
-  const staticMapUrl = locationData && mapboxAccessToken 
-    ? `https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/${locationData.lng},${locationData.lat},14,0/200x100?access_token=${mapboxAccessToken}`
-    : null;
+  const staticMapUrl =
+    locationData && mapboxAccessToken
+      ? `https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/${locationData.lng},${locationData.lat},14,0/200x100?access_token=${mapboxAccessToken}`
+      : null;
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans text-[#304052]">
@@ -87,19 +117,24 @@ export default function HelpFormContent() {
             <div className="flex-1">
               <p className="font-bold text-gray-800 text-sm">{address}</p>
               <p className="text-[10px] text-gray-400 mt-0.5 uppercase tracking-tighter">
-                พัทยา, ชลบุรี
+                {subLocation}
               </p>
             </div>
 
             {/* Mini Map Placeholder (ตามรูป) */}
             <div className="w-24 h-12 bg-gray-100 rounded-lg relative overflow-hidden flex items-center justify-center">
               {staticMapUrl ? (
-                <img src={staticMapUrl} alt="Map" className="absolute inset-0 w-full h-full object-cover opacity-80" />
+                <img
+                  src={staticMapUrl}
+                  alt="Map"
+                  className="absolute inset-0 w-full h-full object-cover opacity-80"
+                />
               ) : (
                 <div
                   className="absolute inset-0 opacity-10"
                   style={{
-                    backgroundImage: "radial-gradient(#000 1px, transparent 1px)",
+                    backgroundImage:
+                      "radial-gradient(#000 1px, transparent 1px)",
                     backgroundSize: "10px 10px",
                   }}
                 ></div>
@@ -145,10 +180,50 @@ export default function HelpFormContent() {
             </div>
           </div>
           <div className="p-4">
-            <div className="w-full h-32 border-2 border-dashed border-gray-100 rounded-2xl flex flex-col items-center justify-center gap-1 text-gray-400 active:bg-gray-50 transition-colors cursor-pointer">
-              <Plus size={24} />
-              <span className="text-xs font-bold">เพิ่มรูปภาพ</span>
-            </div>
+            {images.length > 0 ? (
+              <div className="grid grid-cols-2 gap-3">
+                {images.map((file, idx) => (
+                  <div key={idx} className="relative rounded-2xl overflow-hidden aspect-video bg-gray-100 border border-gray-100 shadow-sm">
+                    <img 
+                      src={URL.createObjectURL(file)} 
+                      alt={`preview-${idx}`} 
+                      className="w-full h-full object-cover"
+                    />
+                    <button 
+                      onClick={() => removeImage(idx)}
+                      className="absolute top-2 right-2 p-1.5 bg-black/50 text-white rounded-full active:scale-90 transition-transform backdrop-blur-sm"
+                    >
+                      <X size={12} strokeWidth={3} />
+                    </button>
+                  </div>
+                ))}
+                {images.length < 4 && (
+                  <div 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="aspect-video border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center gap-1 text-gray-400 active:bg-gray-50 transition-colors cursor-pointer"
+                  >
+                    <Plus size={20} />
+                    <span className="text-[10px] font-bold">เพิ่มรูป</span>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div 
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full h-32 border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center gap-1 text-gray-400 active:bg-gray-50 transition-colors cursor-pointer"
+              >
+                <Plus size={24} />
+                <span className="text-xs font-bold">เพิ่มรูปภาพ</span>
+              </div>
+            )}
+            <input 
+              type="file" 
+              multiple 
+              accept="image/*" 
+              className="hidden" 
+              ref={fileInputRef} 
+              onChange={handleImageChange} 
+            />
           </div>
         </div>
       </div>

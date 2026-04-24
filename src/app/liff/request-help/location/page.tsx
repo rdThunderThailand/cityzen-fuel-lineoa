@@ -8,6 +8,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 export default function SelectLocationPage() {
   const router = useRouter();
   const [address, setAddress] = useState("ซอยบงกช 8, พัทยากลาง");
+  const [subLocation, setSubLocation] = useState("พัทยา, ชลบุรี");
   const [landmark, setLandmark] = useState("");
 
   const [mounted, setMounted] = useState(false);
@@ -19,17 +20,95 @@ export default function SelectLocationPage() {
 
   const mapboxAccessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
+  const fetchAddress = async (lat: number, lng: number) => {
+    if (!mapboxAccessToken) return;
+    try {
+      const res = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${mapboxAccessToken}&language=th`,
+      );
+      const data = await res.json();
+      if (data.features && data.features.length > 0) {
+        const feature = data.features[0];
+
+        // แยกเอาที่อยู่หลัก (ตัดส่วนอำเภอ, จังหวัด, รหัสไปรษณีย์, ประเทศออก)
+        const placeNameParts = feature.place_name
+          .split(",")
+          .map((p: string) => p.trim());
+
+        // ดึงอำเภอ (locality/district), จังหวัด (place/region) และ ประเทศ (country)
+        const context = feature.context || [];
+
+        let district = "";
+        let province = "";
+
+        // 1. หาจาก string parts ก่อน เพราะแม่นยำกว่าในแง่ของคำนำหน้าสำหรับประเทศไทย
+        placeNameParts.forEach((part: string) => {
+          if (part.startsWith("จังหวัด") || part === "กรุงเทพมหานคร") {
+            province = part;
+          } else if (part.startsWith("อำเภอ") || part.startsWith("เขต")) {
+            district = part;
+          }
+        });
+
+        // 2. ถ้าหาไม่เจอ ค่อยไปพึ่ง context จาก Mapbox
+        if (!district) {
+          const districtObj = context.find(
+            (c: any) =>
+              c.id.startsWith("locality") || c.id.startsWith("district"),
+          );
+          if (districtObj) district = districtObj.text;
+        }
+        if (!province) {
+          const provinceObj = context.find(
+            (c: any) => c.id.startsWith("place") || c.id.startsWith("region"),
+          );
+          if (provinceObj) province = provinceObj.text;
+        }
+
+        const countryObj = context.find((c: any) => c.id.startsWith("country"));
+        const country = countryObj ? countryObj.text : "ประเทศไทย";
+
+        // ป้องกันกรณีที่ Mapbox ให้ district กับ province ซ้ำกัน
+        const subLocParts = [];
+        if (district) subLocParts.push(district);
+        if (province && province !== district) subLocParts.push(province);
+        const subLoc = subLocParts.join(", ");
+
+        // กรองเอาเฉพาะส่วนที่ไม่ใช่ อำเภอ จังหวัด และประเทศ เพื่อมาเป็นที่อยู่หลัก (จะทำให้ตำบลหรือถนนยังคงอยู่)
+        const mainAddressParts = placeNameParts.filter((part: string) => {
+          if (district && part.includes(district)) return false;
+          if (province && part.includes(province)) return false;
+          if (country && part.includes(country)) return false;
+          if (part === "ประเทศไทย" || part === "Thailand") return false;
+          return true;
+        });
+
+        let mainAddress = mainAddressParts.join(", ");
+        // Fallback ถ้ากรองแล้วหายหมด
+        if (!mainAddress) {
+          mainAddress = feature.text || placeNameParts[0];
+        }
+
+        setAddress(mainAddress);
+        setSubLocation(subLoc || "ไม่ระบุ");
+      }
+    } catch (err) {
+      console.error("Reverse geocoding failed", err);
+    }
+  };
+
   useEffect(() => {
     setMounted(true);
-    
+
     // โหลดข้อมูลที่เคยเลือกไว้จาก sessionStorage
     const saved = sessionStorage.getItem("helpFormLocation");
     if (saved) {
       try {
         const data = JSON.parse(saved);
         setAddress(data.address);
+        if (data.subLocation) setSubLocation(data.subLocation);
         setLandmark(data.landmark);
-        setViewport(v => ({ ...v, latitude: data.lat, longitude: data.lng }));
+        setViewport((v) => ({ ...v, latitude: data.lat, longitude: data.lng }));
         return; // ไม่ต้องดึงพิกัดใหม่ถ้ามีข้อมูลเดิมแล้ว
       } catch (e) {
         console.error("Failed to parse saved location", e);
@@ -44,6 +123,7 @@ export default function SelectLocationPage() {
             latitude: pos.coords.latitude,
             longitude: pos.coords.longitude,
           }));
+          fetchAddress(pos.coords.latitude, pos.coords.longitude);
         },
         (error) => {
           console.warn("Geolocation failed:", error.message);
@@ -62,12 +142,15 @@ export default function SelectLocationPage() {
             latitude: pos.coords.latitude,
             longitude: pos.coords.longitude,
           }));
+          fetchAddress(pos.coords.latitude, pos.coords.longitude);
         },
         (error) => {
           console.warn("Locate me failed:", error.message);
-          alert("ไม่สามารถดึงตำแหน่งปัจจุบันได้ กรุณาเปิดการใช้งาน Location (GPS)");
+          alert(
+            "ไม่สามารถดึงตำแหน่งปัจจุบันได้ กรุณาเปิดการใช้งาน Location (GPS)",
+          );
         },
-        { enableHighAccuracy: true }
+        { enableHighAccuracy: true },
       );
     }
   };
@@ -96,6 +179,9 @@ export default function SelectLocationPage() {
               mapboxAccessToken={mapboxAccessToken}
               style={{ width: "100%", height: "100%" }}
               onMove={(evt) => setViewport(evt.viewState)}
+              onMoveEnd={(evt) =>
+                fetchAddress(evt.viewState.latitude, evt.viewState.longitude)
+              }
             />
           )}
         </div>
@@ -114,7 +200,7 @@ export default function SelectLocationPage() {
         </div>
 
         {/* ปุ่ม Locate Me */}
-        <button 
+        <button
           onClick={handleLocateMe}
           className="absolute bottom-6 right-6 p-3 bg-white rounded-xl shadow-xl text-gray-600 active:scale-90 transition-transform z-10"
         >
@@ -163,12 +249,16 @@ export default function SelectLocationPage() {
         <div className="mt-8 mb-4">
           <button
             onClick={() => {
-              sessionStorage.setItem("helpFormLocation", JSON.stringify({
-                address,
-                landmark,
-                lat: viewport.latitude,
-                lng: viewport.longitude
-              }));
+              sessionStorage.setItem(
+                "helpFormLocation",
+                JSON.stringify({
+                  address,
+                  subLocation,
+                  landmark,
+                  lat: viewport.latitude,
+                  lng: viewport.longitude,
+                }),
+              );
               router.back();
             }}
             className="w-full py-4 bg-[#304052] text-white rounded-2xl font-bold text-base shadow-lg shadow-gray-200 active:scale-[0.98] transition-transform"
