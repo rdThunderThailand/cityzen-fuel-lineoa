@@ -1,5 +1,6 @@
 "use client";
 import { Camera, ChevronLeft, Info, MapPin, Plus, X } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
@@ -17,7 +18,7 @@ export default function HelpFormContent() {
     lat: number;
     lng: number;
   } | null>(null);
-  
+
   const [images, setImages] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -124,10 +125,12 @@ export default function HelpFormContent() {
             {/* Mini Map Placeholder (ตามรูป) */}
             <div className="w-24 h-12 bg-gray-100 rounded-lg relative overflow-hidden flex items-center justify-center">
               {staticMapUrl ? (
-                <img
+                <Image
                   src={staticMapUrl}
                   alt="Map"
-                  className="absolute inset-0 w-full h-full object-cover opacity-80"
+                  fill
+                  className="object-cover opacity-80"
+                  unoptimized
                 />
               ) : (
                 <div
@@ -183,13 +186,18 @@ export default function HelpFormContent() {
             {images.length > 0 ? (
               <div className="grid grid-cols-2 gap-3">
                 {images.map((file, idx) => (
-                  <div key={idx} className="relative rounded-2xl overflow-hidden aspect-video bg-gray-100 border border-gray-100 shadow-sm">
-                    <img 
-                      src={URL.createObjectURL(file)} 
-                      alt={`preview-${idx}`} 
-                      className="w-full h-full object-cover"
+                  <div
+                    key={idx}
+                    className="relative rounded-2xl overflow-hidden aspect-video bg-gray-100 border border-gray-100 shadow-sm"
+                  >
+                    <Image
+                      src={URL.createObjectURL(file)}
+                      alt={`preview-${idx}`}
+                      fill
+                      className="object-cover"
+                      unoptimized
                     />
-                    <button 
+                    <button
                       onClick={() => removeImage(idx)}
                       className="absolute top-2 right-2 p-1.5 bg-black/50 text-white rounded-full active:scale-90 transition-transform backdrop-blur-sm"
                     >
@@ -198,7 +206,7 @@ export default function HelpFormContent() {
                   </div>
                 ))}
                 {images.length < 4 && (
-                  <div 
+                  <div
                     onClick={() => fileInputRef.current?.click()}
                     className="aspect-video border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center gap-1 text-gray-400 active:bg-gray-50 transition-colors cursor-pointer"
                   >
@@ -208,7 +216,7 @@ export default function HelpFormContent() {
                 )}
               </div>
             ) : (
-              <div 
+              <div
                 onClick={() => fileInputRef.current?.click()}
                 className="w-full h-32 border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center gap-1 text-gray-400 active:bg-gray-50 transition-colors cursor-pointer"
               >
@@ -216,13 +224,13 @@ export default function HelpFormContent() {
                 <span className="text-xs font-bold">เพิ่มรูปภาพ</span>
               </div>
             )}
-            <input 
-              type="file" 
-              multiple 
-              accept="image/*" 
-              className="hidden" 
-              ref={fileInputRef} 
-              onChange={handleImageChange} 
+            <input
+              type="file"
+              multiple
+              accept="image/*"
+              className="hidden"
+              ref={fileInputRef}
+              onChange={handleImageChange}
             />
           </div>
         </div>
@@ -231,7 +239,22 @@ export default function HelpFormContent() {
       {/* --- Footer Button --- */}
       <div className="p-4 bg-white border-t border-gray-50 mt-auto">
         <button
-          onClick={() => router.push(`/liff/request-help/review?type=${type}`)}
+          onClick={() => {
+            const imageMetas = images.map((file) => ({
+              name: file.name,
+              size: file.size,
+              type: file.type,
+            }));
+            sessionStorage.setItem(
+              "helpFormDetails",
+              JSON.stringify({ details }),
+            );
+            sessionStorage.setItem(
+              "helpFormImages",
+              JSON.stringify(imageMetas),
+            );
+            router.push(`/liff/request-help/review?type=${type}`);
+          }}
           className="w-full py-4 bg-[#304052] text-white rounded-xl font-bold text-base shadow-lg active:scale-[0.98] transition-transform"
         >
           ตรวจสอบข้อมูล
