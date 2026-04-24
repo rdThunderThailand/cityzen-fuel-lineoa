@@ -1,9 +1,9 @@
 "use client";
 import { ChevronLeft, MapPin, AlertCircle, Image as ImageIcon, Fuel, Droplet, Utensils, Stethoscope, Zap, CarFront, MoreHorizontal } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 
-export default function ReviewPage() {
+function ReviewContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const type = searchParams.get("type") || "others";
@@ -158,5 +158,13 @@ export default function ReviewPage() {
         </button>
       </div>
     </div>
+  );
+}
+
+export default function ReviewPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center">กำลังโหลด...</div>}>
+      <ReviewContent />
+    </Suspense>
   );
 }
