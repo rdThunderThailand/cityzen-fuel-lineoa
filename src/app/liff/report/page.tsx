@@ -1,6 +1,6 @@
 // src/app/liff/report/page.tsx
 "use client";
-import { ScreenSelectStation } from "@/components/fuel/report/ScreenSelectStation";
+import { ScreenSelectStation } from "@/components/report/ScreenSelectStation";
 import { fetchNearbyStations } from "@/services/thunder-core";
 import { Station } from "@/types/fuel";
 import { useEffect, useState } from "react";
