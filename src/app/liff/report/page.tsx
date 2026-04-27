@@ -15,7 +15,7 @@ export default function ReportPage() {
 
   // Data State
   const [reportData, setReportData] = useState({
-    station: null,
+    station: null as any,
     status: "",
     fuels: [] as string[],
     note: "",
@@ -34,9 +34,6 @@ export default function ReportPage() {
       setLoading(false);
     });
   }, []);
-
-  const nextStep = () => setStep((prev) => (prev + 1) as ReportStep);
-  const prevStep = () => setStep((prev) => (prev - 1) as ReportStep);
 
   return (
     <main className="min-h-screen bg-[#f4f4f4] pb-24 font-sans">
