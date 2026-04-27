@@ -1,5 +1,10 @@
 export type FuelStatus = "available" | "partial" | "limited" | "out_of_service";
 
+export interface StationFuelStatus {
+  updated_at: string;
+  [key: string]: unknown;
+}
+
 export interface Station {
   id: string;
   name: string;
@@ -14,6 +19,8 @@ export interface Station {
   queue_status?: string; // เพิ่ม queue_status สำหรับหน้า map
   updated_at: string;
   fuels: string[]; // เช่น ['ดีเซล', '95']
+  fuel_station: string;
+  fuel_status?: StationFuelStatus[]; // Added to match data returned by API and used in webhook
 }
 
 export interface FilterState {

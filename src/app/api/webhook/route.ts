@@ -1,4 +1,3 @@
-// app/api/webhook/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import * as line from "@line/bot-sdk";
 import { fetchNearbyStations } from "@/services/thunder-core";
@@ -16,11 +15,11 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const signature = req.headers.get("x-line-signature") as string;
 
-  // ตรวจสอบ Signature เพื่อความปลอดภัย
+  // 1. ตรวจสอบ Signature เพื่อความปลอดภัย
   if (
     !line.validateSignature(
       JSON.stringify(body),
-      config.channelSecret,
+      config.channelAccessToken || config.channelSecret,
       signature,
     )
   ) {
@@ -34,29 +33,51 @@ export async function POST(req: NextRequest) {
       if (event.type === "message" && event.message.type === "location") {
         const { latitude, longitude } = event.message;
 
-        // เรียกใช้ API ของ Thunder Core ผ่าน API Key
+        // 2. ดึงข้อมูลปั๊มจาก Thunder Core (Supabase API)
         const stations = await fetchNearbyStations(latitude, longitude);
 
-        if (stations.length === 0) {
+        if (!stations || stations.length === 0) {
           return client.replyMessage({
             replyToken: event.replyToken,
             messages: [
               {
                 type: "text",
-                text: "ไม่พบข้อมูลปั๊มน้ำมันจากระบบหลักในขณะนี้",
+                text: "ไม่พบข้อมูลปั๊มน้ำมันในพิกัดใกล้เคียงของคุณ",
               },
             ],
           });
         }
 
+        // 3. สร้าง Flex Message Bubbles
         const bubbles: line.FlexBubble[] = stations
           .slice(0, 10)
           .map((station) => {
             const distKm = (station.distance_meters / 1000).toFixed(2);
 
-            // ดึงเวลาปัจจุบัน (เวลาไทย)
+            // --- 🕒 Logic คำนวณเวลาจริง ---
             const now = new Date();
-            const thaiTime = now.toLocaleString("en-US", {
+            let latestUpdate: Date | null = null;
+
+            // หาเวลาที่ใหม่ที่สุดจากรายการสถานะน้ำมัน
+            if (station.fuel_status && station.fuel_status.length > 0) {
+              const times = station.fuel_status.map((fs) =>
+                new Date(fs.updated_at).getTime(),
+              );
+              latestUpdate = new Date(Math.max(...times));
+            }
+
+            const updateTime = latestUpdate || now;
+            const diffMs = now.getTime() - updateTime.getTime();
+            const diffMins = Math.floor(diffMs / 60000);
+
+            let timeLabel = "";
+            if (diffMins < 1) timeLabel = "เมื่อสักครู่";
+            else if (diffMins < 60) timeLabel = `${diffMins} นาทีที่แล้ว`;
+            else if (diffMins < 1440)
+              timeLabel = `${Math.floor(diffMins / 60)} ชม.ที่แล้ว`;
+            else timeLabel = "มากกว่า 1 วันที่แล้ว";
+
+            const thaiTime = updateTime.toLocaleString("en-US", {
               timeZone: "Asia/Bangkok",
               hour: "2-digit",
               minute: "2-digit",
@@ -70,7 +91,7 @@ export async function POST(req: NextRequest) {
                 type: "image",
                 url:
                   station.brand === "PTT"
-                    ? "https://cityzen-fuel-lineoa.vercel.app/ptt-station.jpg" // แนะนำให้ใช้ path จริงบน vercel
+                    ? "https://cityzen-fuel-lineoa.vercel.app/ptt-station.jpg"
                     : "https://mpics.mgronline.com/pics/Images/566000002821101.JPEG",
                 size: "full",
                 aspectRatio: "20:13",
@@ -81,7 +102,6 @@ export async function POST(req: NextRequest) {
                 layout: "vertical",
                 paddingAll: "20px",
                 contents: [
-                  // Row 1: Status & Time
                   {
                     type: "box",
                     layout: "horizontal",
@@ -116,7 +136,6 @@ export async function POST(req: NextRequest) {
                       },
                     ],
                   },
-                  // Row 2: Station Name
                   {
                     type: "text",
                     text: station.name || "ปั๊มน้ำมัน",
@@ -126,7 +145,6 @@ export async function POST(req: NextRequest) {
                     wrap: true,
                     color: "#304052",
                   },
-                  // Row 3: Location (Icon + Text)
                   {
                     type: "box",
                     layout: "baseline",
@@ -140,14 +158,13 @@ export async function POST(req: NextRequest) {
                       },
                       {
                         type: "text",
-                        text: `กรุงเทพมหานคร ${distKm} กม.`,
+                        text: `${station.province || "ใกล้เคียง"} ${distKm} กม.`,
                         color: "#8c8c8c",
                         size: "sm",
                         flex: 0,
                       },
                     ],
                   },
-                  // Row 4: Stats (Time + Queue)
                   {
                     type: "box",
                     layout: "horizontal",
@@ -192,7 +209,6 @@ export async function POST(req: NextRequest) {
                       },
                     ],
                   },
-                  // Row 5: Update Badge
                   {
                     type: "box",
                     layout: "baseline",
@@ -206,7 +222,7 @@ export async function POST(req: NextRequest) {
                     contents: [
                       {
                         type: "text",
-                        text: `🕒 อัปเดตล่าสุด ${thaiTime} นาทีที่แล้ว`,
+                        text: `🕒 อัปเดตล่าสุดเมื่อ ${timeLabel}`,
                         color: "#631da7",
                         size: "xs",
                         weight: "bold",
@@ -241,7 +257,7 @@ export async function POST(req: NextRequest) {
                     action: {
                       type: "uri",
                       label: "💬 แจ้งข้อมูลเพิ่ม",
-                      uri: `https://cityzen-fuel-lineoa.vercel.app/report?id=${station.id}`, // ปรับ URL ตามความจริง
+                      uri: `https://cityzen-fuel-lineoa.vercel.app/report?id=${station.id}`,
                     },
                   },
                 ],
@@ -249,7 +265,7 @@ export async function POST(req: NextRequest) {
             };
           });
 
-        // ส่งกลับหา User
+        // 4. ส่ง Reply กลับหาผู้ใช้
         try {
           return await client.replyMessage({
             replyToken: event.replyToken,
@@ -257,35 +273,16 @@ export async function POST(req: NextRequest) {
               {
                 type: "flex",
                 altText: "ปั๊มน้ำมันใกล้คุณ",
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 contents: { type: "carousel", contents: bubbles as any },
               },
             ],
           });
-        } catch (error: unknown) {
-          const err = error as {
-            originalError?: { response?: { data?: unknown } };
-            message?: string;
-          };
+        } catch (error: any) {
           console.error(
-            "LINE API Error:",
-            err.originalError?.response?.data || error,
-          );
-          return NextResponse.json(
-            { status: "error", error: err.message || "Unknown error" },
-            { status: 500 },
+            "LINE Reply Error:",
+            error.originalError?.response?.data || error.message,
           );
         }
-      }
-
-      if (event.type === "postback") {
-        // กรณี Rich Menu ส่ง Action เป็น Postback (นิยมใช้ส่งค่า ID/Data)
-        const data = event.postback.data;
-
-        return client.replyMessage({
-          replyToken: event.replyToken,
-          messages: [{ type: "text", text: `Postback data คือ: ${data}` }],
-        });
       }
     }),
   );

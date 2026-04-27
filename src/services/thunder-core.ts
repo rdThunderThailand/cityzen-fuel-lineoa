@@ -1,5 +1,3 @@
-// services/thunder-core.ts
-
 import { Station } from "@/types/fuel";
 
 export async function fetchNearbyStations(
