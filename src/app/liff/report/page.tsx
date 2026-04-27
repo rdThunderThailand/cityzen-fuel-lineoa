@@ -3,6 +3,7 @@
 import { ScreenSelectStation } from "@/components/report/ScreenSelectStation";
 import { fetchNearbyStations } from "@/services/thunder-core";
 import { Station } from "@/types/fuel";
+import { ChevronLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type ReportStep = 1 | 2 | 3 | 4 | 5;
@@ -10,16 +11,16 @@ type ReportStep = 1 | 2 | 3 | 4 | 5;
 export default function ReportPage() {
   const [step, setStep] = useState<ReportStep>(1);
   const [loading, setLoading] = useState(true);
-  const [nearbyStations, setNearbyStations] = useState<any[]>([]);
+  const [nearbyStations, setNearbyStations] = useState<Station[]>([]);
 
   // Data State
   const [reportData, setReportData] = useState({
-    station: null as any,
+    station: null,
     status: "",
     fuels: [] as string[],
     note: "",
     time: "ตอนนี้",
-    image: null as any,
+    image: null,
   });
 
   // Step 1: Auto-fetch nearby stations
@@ -38,86 +39,90 @@ export default function ReportPage() {
   const prevStep = () => setStep((prev) => (prev - 1) as ReportStep);
 
   return (
-    // <main className="min-h-screen bg-gray-50 pb-10">
-    //   {/* Header & Progress Bar */}
-    //   <header className="bg-white px-4 pt-6 pb-4 sticky top-0 z-10 border-b border-gray-100">
-    //     <div className="flex items-center justify-between mb-4">
-    //       {step > 1 && step < 5 ? (
-    //         <button onClick={prevStep} className="p-2 -ml-2 text-gray-400">
-    //           <ChevronLeft />
-    //         </button>
-    //       ) : (
-    //         <div className="w-10" />
-    //       )}
-    //       <h1 className="text-lg font-bold text-gray-900">แจ้งสถานการณ์ปั๊ม</h1>
-    //       <div className="w-10" />
-    //     </div>
-    //     {step < 5 && (
-    //       <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
-    //         <div
-    //           className="h-full bg-blue-600 transition-all duration-300"
-    //           style={{ width: `${(step / 4) * 100}%` }}
-    //         />
-    //       </div>
-    //     )}
-    //   </header>
+    <main className="min-h-screen bg-[#f4f4f4] pb-24 font-sans">
+      {/* Header */}
+      <header className="bg-white px-4 pt-10 pb-4 sticky top-0 z-10 flex items-center justify-between border-b border-gray-100">
+        <button
+          onClick={() => window.history.back()}
+          className="p-2 -ml-2 text-gray-500"
+        >
+          <ChevronLeft size={24} />
+        </button>
+        <h1 className="text-lg font-medium text-gray-800">แจ้งสถานการณ์ปั๊ม</h1>
+        <div className="w-10" />
+      </header>
 
-    //   <div className="p-4">
-    //     {step === 1 && (
-    //       <ScreenSelectStation
-    //         stations={nearbyStations}
-    //         loading={loading}
-    //         onSelect={(s: Station) => {
-    //           setReportData({ ...reportData, station: s });
-    //           nextStep();
-    //         }}
-    //       />
-    //     )}
-    //     {step === 2 && (
-    //       <ScreenStatusSelection
-    //         data={reportData}
-    //         setData={setReportData}
-    //         onNext={nextStep}
-    //       />
-    //     )}
-    //     {step === 3 && (
-    //       <ScreenEvidence
-    //         data={reportData}
-    //         setData={setReportData}
-    //         onNext={nextStep}
-    //       />
-    //     )}
-    //     {step === 4 && <ScreenReview data={reportData} onSubmit={nextStep} />}
-    //     {step === 5 && <ScreenSuccess />}
-    //   </div>
-    // </main>
-    <div>
+      {/* Progress Bar Area */}
+      <div className="bg-white px-4 py-4 border-b border-gray-100">
+        <div className="flex items-start justify-between relative">
+          {/* Line behind the dots */}
+          <div className="absolute top-1.5 left-[10%] right-[10%] h-[2px] bg-gray-100 z-0"></div>
+          <div className="absolute top-1.5 left-[10%] w-[10%] h-[2px] bg-blue-600 z-0"></div>
+
+          {/* Step 1 */}
+          <div className="relative z-10 flex flex-col items-center gap-2 w-1/4">
+            <div className="w-3 h-3 rounded-full bg-blue-600 ring-4 ring-white"></div>
+            <span className="text-[10px] text-blue-600 font-medium text-center">
+              แจ้งสถานการณ์ปั๊ม
+            </span>
+          </div>
+
+          {/* Step 2 */}
+          <div className="relative z-10 flex flex-col items-center gap-2 w-1/4">
+            <div className="w-3 h-3 rounded-full bg-gray-200 ring-4 ring-white"></div>
+            <span className="text-[10px] text-gray-400 text-center">
+              เลือกสถานะ
+            </span>
+          </div>
+
+          {/* Step 3 */}
+          <div className="relative z-10 flex flex-col items-center gap-2 w-1/4">
+            <div className="w-3 h-3 rounded-full bg-gray-200 ring-4 ring-white"></div>
+            <span className="text-[10px] text-gray-400 text-center">
+              ข้อมูลเพิ่มเติม
+            </span>
+          </div>
+
+          {/* Step 4 */}
+          <div className="relative z-10 flex flex-col items-center gap-2 w-1/4">
+            <div className="w-3 h-3 rounded-full bg-gray-200 ring-4 ring-white"></div>
+            <span className="text-[10px] text-gray-400 text-center">
+              ตรวจสอบก่อนส่ง
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="p-4">
+        {step === 1 && (
+          <ScreenSelectStation
+            stations={nearbyStations}
+            loading={loading}
+            selectedStation={reportData.station}
+            onSelect={(s: Station) => {
+              setReportData({ ...reportData, station: s });
+            }}
+          />
+        )}
+      </div>
+
+      {/* Fixed Bottom Button */}
       {step === 1 && (
-        <ScreenSelectStation
-          stations={nearbyStations}
-          loading={loading}
-          onSelect={(s: Station) => {
-            // 🚀 แทนที่จะทำ nextStep() ให้ทำการ Redirect ไปเลย
-            const targetUrl = `https://thundercore.vercel.app/r/${s.id}`;
-
-            // เลือกใช้แบบใดแบบหนึ่งครับ:
-
-            // แบบที่ 1: เปลี่ยนหน้าใน LIFF เลย (หน้าเว็บเดิมจะหายไป กลายเป็นเว็บใหม่)
-            window.location.href = targetUrl;
-
-            // หรือ แบบที่ 2: ถ้าอยากให้เปิดใน Browser ภายนอก (ต้องเช็คก่อนว่ารันใน LINE ไหม)
-            /* if (typeof window !== "undefined" && (window as any).liff?.isInClient()) {
-        (window as any).liff.openWindow({
-          url: targetUrl,
-          external: true
-        });
-      } else {
-        window.location.href = targetUrl;
-      }
-      */
-          }}
-        />
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-100 pb-6 shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
+          <button
+            disabled={!reportData.station}
+            onClick={() => {
+              if (reportData.station) {
+                const targetUrl = `https://thundercore.vercel.app/r/${reportData.station.id}`;
+                window.location.href = targetUrl;
+              }
+            }}
+            className="w-full py-3.5 rounded-xl text-white font-medium text-sm bg-[#34445c] disabled:bg-gray-300 disabled:cursor-not-allowed active:scale-[0.98] transition-transform"
+          >
+            ถัดไป
+          </button>
+        </div>
       )}
-    </div>
+    </main>
   );
 }
