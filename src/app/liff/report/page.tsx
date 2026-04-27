@@ -1,6 +1,7 @@
 // src/app/liff/report/page.tsx
 "use client";
 import { ScreenSelectStation } from "@/components/report/ScreenSelectStation";
+import { ScreenMapSelect } from "@/components/report/ScreenMapSelect";
 import { fetchNearbyStations } from "@/services/thunder-core";
 import { Station } from "@/types/fuel";
 import { ChevronLeft } from "lucide-react";
@@ -12,6 +13,8 @@ export default function ReportPage() {
   const [step, setStep] = useState<ReportStep>(1);
   const [loading, setLoading] = useState(true);
   const [nearbyStations, setNearbyStations] = useState<Station[]>([]);
+  const [isMapMode, setIsMapMode] = useState(false);
+  const [currentLocation, setCurrentLocation] = useState<{lat: number, lng: number} | null>(null);
 
   // Data State
   const [reportData, setReportData] = useState({
@@ -26,6 +29,7 @@ export default function ReportPage() {
   // Step 1: Auto-fetch nearby stations
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(async (pos) => {
+      setCurrentLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
       const data = await fetchNearbyStations(
         pos.coords.latitude,
         pos.coords.longitude,
@@ -34,6 +38,20 @@ export default function ReportPage() {
       setLoading(false);
     });
   }, []);
+
+  if (isMapMode) {
+    return (
+      <ScreenMapSelect 
+        initialStations={nearbyStations}
+        initialLocation={currentLocation}
+        onBack={() => setIsMapMode(false)}
+        onConfirm={(station) => {
+          setReportData({ ...reportData, station });
+          setIsMapMode(false);
+        }}
+      />
+    );
+  }
 
   return (
     <main className="min-h-screen bg-[#f4f4f4] pb-24 font-sans">
@@ -99,6 +117,7 @@ export default function ReportPage() {
             onSelect={(s: Station) => {
               setReportData({ ...reportData, station: s });
             }}
+            onOpenMap={() => setIsMapMode(true)}
           />
         )}
       </div>

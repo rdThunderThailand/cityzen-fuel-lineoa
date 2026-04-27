@@ -1,7 +1,7 @@
 import { Station } from "@/types/fuel";
 import { Search, ListChecks, MapPin, CheckCircle2 } from "lucide-react";
 
-export function ScreenSelectStation({ stations, loading, selectedStation, onSelect }: any) {
+export function ScreenSelectStation({ stations, loading, selectedStation, onSelect, onOpenMap }: any) {
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4">
       <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
@@ -89,7 +89,7 @@ export function ScreenSelectStation({ stations, loading, selectedStation, onSele
           )}
           
           {/* Other station / Map button */}
-          <button className="w-full py-4 mt-2 border-2 border-dashed border-blue-200 rounded-xl text-blue-500 font-medium text-sm flex items-center justify-center gap-2 bg-[#f8fbff]">
+          <button onClick={onOpenMap} className="w-full py-4 mt-2 border-2 border-dashed border-blue-200 rounded-xl text-blue-500 font-medium text-sm flex items-center justify-center gap-2 bg-[#f8fbff]">
             <MapPin size={16} /> ค้นหาปั๊มอื่น / เลือกบนแผนที่
           </button>
         </div>
