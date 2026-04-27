@@ -54,6 +54,15 @@ export async function POST(req: NextRequest) {
           .map((station) => {
             const distKm = (station.distance_meters / 1000).toFixed(2);
 
+            // ดึงเวลาปัจจุบัน (เวลาไทย)
+            const now = new Date();
+            const thaiTime = now.toLocaleString("en-US", {
+              timeZone: "Asia/Bangkok",
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: false,
+            });
+
             return {
               type: "bubble",
               size: "mega",
@@ -99,7 +108,7 @@ export async function POST(req: NextRequest) {
                       },
                       {
                         type: "text",
-                        text: "05:42 น.",
+                        text: `${thaiTime} น.`,
                         color: "#8c8c8c",
                         size: "sm",
                         align: "end",
@@ -197,7 +206,7 @@ export async function POST(req: NextRequest) {
                     contents: [
                       {
                         type: "text",
-                        text: "🕒 อัปเดตล่าสุด 5 นาทีที่แล้ว",
+                        text: `🕒 อัปเดตล่าสุด ${thaiTime} นาทีที่แล้ว`,
                         color: "#631da7",
                         size: "xs",
                         weight: "bold",
