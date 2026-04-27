@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
                 type: "image",
                 url:
                   station.brand === "PTT"
-                    ? "https://silas-caruncular-erna.ngrok-free.dev/ptt.jpg"
+                    ? "https://cityzen-fuel-lineoa.vercel.app/ptt-station.jpg" // แนะนำให้ใช้ path จริงบน vercel
                     : "https://mpics.mgronline.com/pics/Images/566000002821101.JPEG",
                 size: "full",
                 aspectRatio: "20:13",
@@ -70,8 +70,9 @@ export async function POST(req: NextRequest) {
               body: {
                 type: "box",
                 layout: "vertical",
-                paddingAll: "12px",
+                paddingAll: "20px",
                 contents: [
+                  // Row 1: Status & Time
                   {
                     type: "box",
                     layout: "horizontal",
@@ -81,24 +82,18 @@ export async function POST(req: NextRequest) {
                         layout: "baseline",
                         backgroundColor: "#e0f8e9",
                         cornerRadius: "100px",
-                        paddingStart: "8px",
-                        paddingEnd: "8px",
+                        paddingStart: "10px",
+                        paddingEnd: "10px",
                         paddingTop: "2px",
                         paddingBottom: "2px",
                         flex: 0,
                         contents: [
                           {
-                            type: "icon",
-                            url: "https://cdn-icons-png.flaticon.com/512/190/190411.png",
-                            size: "xxs",
-                          },
-                          {
                             type: "text",
-                            text: "มีบริการ",
+                            text: "● มีบริการ",
                             color: "#1ca34d",
                             size: "xs",
                             weight: "bold",
-                            margin: "sm",
                           },
                         ],
                       },
@@ -112,6 +107,7 @@ export async function POST(req: NextRequest) {
                       },
                     ],
                   },
+                  // Row 2: Station Name
                   {
                     type: "text",
                     text: station.name || "ปั๊มน้ำมัน",
@@ -119,11 +115,14 @@ export async function POST(req: NextRequest) {
                     size: "xl",
                     margin: "md",
                     wrap: true,
+                    color: "#304052",
                   },
+                  // Row 3: Location (Icon + Text)
                   {
                     type: "box",
                     layout: "baseline",
                     margin: "md",
+                    spacing: "sm",
                     contents: [
                       {
                         type: "icon",
@@ -132,67 +131,76 @@ export async function POST(req: NextRequest) {
                       },
                       {
                         type: "text",
-                        text: `ห่างจากคุณ ${distKm} กม.`,
+                        text: `กรุงเทพมหานคร ${distKm} กม.`,
                         color: "#8c8c8c",
                         size: "sm",
-                        margin: "sm",
                         flex: 0,
                       },
                     ],
                   },
+                  // Row 4: Stats (Time + Queue)
                   {
                     type: "box",
-                    layout: "baseline",
+                    layout: "horizontal",
                     margin: "md",
+                    spacing: "lg",
                     contents: [
                       {
-                        type: "icon",
-                        url: "https://cdn-icons-png.flaticon.com/512/2088/2088617.png",
-                        size: "xs",
+                        type: "box",
+                        layout: "baseline",
+                        spacing: "sm",
+                        contents: [
+                          {
+                            type: "icon",
+                            url: "https://cdn-icons-png.flaticon.com/512/2088/2088617.png",
+                            size: "xs",
+                          },
+                          {
+                            type: "text",
+                            text: "25 นาที",
+                            color: "#8c8c8c",
+                            size: "xs",
+                          },
+                        ],
                       },
                       {
-                        type: "text",
-                        text: "25 นาที",
-                        color: "#8c8c8c",
-                        size: "xs",
-                        margin: "sm",
-                        flex: 0,
-                      },
-                      {
-                        type: "icon",
-                        url: "https://cdn-icons-png.flaticon.com/512/3204/3204121.png",
-                        size: "xs",
-                        margin: "md",
-                      },
-                      {
-                        type: "text",
-                        text: "คิวน้อย",
-                        color: "#8c8c8c",
-                        size: "xs",
-                        margin: "sm",
-                        flex: 0,
+                        type: "box",
+                        layout: "baseline",
+                        spacing: "sm",
+                        contents: [
+                          {
+                            type: "icon",
+                            url: "https://cdn-icons-png.flaticon.com/512/3204/3204121.png",
+                            size: "xs",
+                          },
+                          {
+                            type: "text",
+                            text: "คิวน้อย",
+                            color: "#8c8c8c",
+                            size: "xs",
+                          },
+                        ],
                       },
                     ],
                   },
+                  // Row 5: Update Badge
                   {
                     type: "box",
                     layout: "baseline",
-                    margin: "md",
+                    margin: "xl",
                     backgroundColor: "#f4eaff",
-                    paddingStart: "8px",
-                    paddingEnd: "8px",
-                    paddingTop: "4px",
-                    paddingBottom: "4px",
-                    cornerRadius: "8px",
-                    flex: 0,
+                    paddingStart: "12px",
+                    paddingEnd: "12px",
+                    paddingTop: "6px",
+                    paddingBottom: "6px",
+                    cornerRadius: "12px",
                     contents: [
-                      { type: "text", text: "🕒", size: "xs" },
                       {
                         type: "text",
-                        text: "อัปเดตล่าสุด 5 นาทีที่แล้ว",
+                        text: "🕒 อัปเดตล่าสุด 5 นาทีที่แล้ว",
                         color: "#631da7",
                         size: "xs",
-                        margin: "sm",
+                        weight: "bold",
                       },
                     ],
                   },
@@ -202,19 +210,20 @@ export async function POST(req: NextRequest) {
                 type: "box",
                 layout: "vertical",
                 spacing: "sm",
-                paddingAll: "12px",
+                paddingAll: "20px",
+                paddingTop: "0px",
                 contents: [
                   {
                     type: "button",
                     style: "primary",
                     color: "#304052",
-                    height: "sm",
+                    height: "md",
                     action: {
                       type: "uri",
                       label: "📍 แผนที่",
-                      // แก้ไขจุดผิด: ลบเลข 6 ออก และใช้ query parameter ที่ถูกต้อง
                       uri: `https://www.google.com/maps/search/?api=1&query=${station.latitude},${station.longitude}`,
                     },
+                    cornerRadius: "xl",
                   },
                   {
                     type: "button",
@@ -224,8 +233,7 @@ export async function POST(req: NextRequest) {
                     action: {
                       type: "uri",
                       label: "💬 แจ้งข้อมูลเพิ่ม",
-                      // ใส่ Link สำหรับแจ้งข้อมูล (เช่น LIFF หรือเบอร์โทร)
-                      uri: `https://line.me/R/nv/location/`,
+                      uri: `https://cityzen-fuel-lineoa.vercel.app/report?id=${station.id}`, // ปรับ URL ตามความจริง
                     },
                   },
                 ],
