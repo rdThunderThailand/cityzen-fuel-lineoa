@@ -223,7 +223,6 @@ export async function POST(req: NextRequest) {
                       label: "📍 แผนที่",
                       uri: `https://www.google.com/maps/search/?api=1&query=${station.latitude},${station.longitude}`,
                     },
-                    cornerRadius: "xl",
                   },
                   {
                     type: "button",
