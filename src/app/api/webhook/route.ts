@@ -12,20 +12,18 @@ const client = new line.messagingApi.MessagingApiClient({
 });
 
 export async function POST(req: NextRequest) {
-  const body = await req.json();
+  // 1. รับค่าเป็น text (Raw Body) เพื่อเช็ค Signature ให้แม่นยำ
+  const rawBody = await req.text();
   const signature = req.headers.get("x-line-signature") as string;
 
-  // 1. ตรวจสอบ Signature เพื่อความปลอดภัย
-  if (
-    !line.validateSignature(
-      JSON.stringify(body),
-      config.channelAccessToken || config.channelSecret,
-      signature,
-    )
-  ) {
+  // 2. ตรวจสอบ Signature โดยใช้ channelSecret เท่านั้น
+  if (!line.validateSignature(rawBody, config.channelSecret, signature)) {
+    console.error("❌ Signature Verification Failed");
     return NextResponse.json({ status: "Unauthorized" }, { status: 401 });
   }
 
+  // 3. แปลงเป็น JSON หลังจากเช็ค Signature เสร็จ
+  const body = JSON.parse(rawBody);
   const events: line.WebhookEvent[] = body.events;
 
   await Promise.all(
@@ -33,7 +31,6 @@ export async function POST(req: NextRequest) {
       if (event.type === "message" && event.message.type === "location") {
         const { latitude, longitude } = event.message;
 
-        // 2. ดึงข้อมูลปั๊มจาก Thunder Core (Supabase API)
         const stations = await fetchNearbyStations(latitude, longitude);
 
         if (!stations || stations.length === 0) {
@@ -48,7 +45,6 @@ export async function POST(req: NextRequest) {
           });
         }
 
-        // 3. สร้าง Flex Message Bubbles
         const bubbles: line.FlexBubble[] = stations
           .slice(0, 10)
           .map((station) => {
@@ -58,7 +54,6 @@ export async function POST(req: NextRequest) {
             const now = new Date();
             let latestUpdate: Date | null = null;
 
-            // หาเวลาที่ใหม่ที่สุดจากรายการสถานะน้ำมัน
             if (station.fuel_status && station.fuel_status.length > 0) {
               const times = station.fuel_status.map((fs) =>
                 new Date(fs.updated_at).getTime(),
@@ -246,6 +241,7 @@ export async function POST(req: NextRequest) {
                     action: {
                       type: "uri",
                       label: "📍 แผนที่",
+                      // ✅ แก้ไข URI ตรงนี้ให้ถูกต้อง
                       uri: `https://www.google.com/maps/search/?api=1&query=${station.latitude},${station.longitude}`,
                     },
                   },
@@ -265,7 +261,6 @@ export async function POST(req: NextRequest) {
             };
           });
 
-        // 4. ส่ง Reply กลับหาผู้ใช้
         try {
           return await client.replyMessage({
             replyToken: event.replyToken,
