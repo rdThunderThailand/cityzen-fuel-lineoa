@@ -66,7 +66,7 @@ export default function FuelMapPage() {
     zoom: 12,
   });
 
-  const [mapboxAccessToken, setMapboxAccessToken] = useState<string | null>(null);
+  const [mapboxAccessToken, setMapboxAccessToken] = useState<string>();
 
   useEffect(() => {
     fetch("https://citizen-server.vercel.app/api/mapbox-token")
