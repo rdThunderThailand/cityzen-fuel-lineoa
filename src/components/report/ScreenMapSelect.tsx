@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Map, { Marker, GeolocateControl, NavigationControl } from "react-map-gl/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { ChevronLeft, Search, Filter, CheckCircle2, MapPin } from "lucide-react";
@@ -26,7 +26,18 @@ export function ScreenMapSelect({
   const [stations, setStations] = useState<Station[]>(initialStations);
   const [selectedStation, setSelectedStation] = useState<Station | null>(null);
   const [filter, setFilter] = useState("ทั้งหมด");
-  const mapboxAccessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+  const [mapboxAccessToken, setMapboxAccessToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("https://citizen-server.vercel.app/api/mapbox-token")
+      .then(res => res.json())
+      .then(data => {
+        if (data.token) {
+          setMapboxAccessToken(data.token);
+        }
+      })
+      .catch(err => console.error("Failed to fetch mapbox token:", err));
+  }, []);
 
   const [viewport, setViewport] = useState({
     latitude: initialLocation?.lat || 13.7367,

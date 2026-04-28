@@ -14,7 +14,10 @@ export default function ReportPage() {
   const [loading, setLoading] = useState(true);
   const [nearbyStations, setNearbyStations] = useState<Station[]>([]);
   const [isMapMode, setIsMapMode] = useState(false);
-  const [currentLocation, setCurrentLocation] = useState<{lat: number, lng: number} | null>(null);
+  const [currentLocation, setCurrentLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
 
   // Data State
   const [reportData, setReportData] = useState({
@@ -29,7 +32,10 @@ export default function ReportPage() {
   // Step 1: Auto-fetch nearby stations
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(async (pos) => {
-      setCurrentLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+      setCurrentLocation({
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude,
+      });
       const data = await fetchNearbyStations(
         pos.coords.latitude,
         pos.coords.longitude,
@@ -41,7 +47,7 @@ export default function ReportPage() {
 
   if (isMapMode) {
     return (
-      <ScreenMapSelect 
+      <ScreenMapSelect
         initialStations={nearbyStations}
         initialLocation={currentLocation}
         onBack={() => setIsMapMode(false)}
@@ -129,7 +135,7 @@ export default function ReportPage() {
             disabled={!reportData.station}
             onClick={() => {
               if (reportData.station) {
-                const targetUrl = `https://thundercore.vercel.app/r/${reportData.station.id}`;
+                const targetUrl = `https://thundercore.vercel.app/r/${reportData.station.station_code}`;
                 window.location.href = targetUrl;
               }
             }}
