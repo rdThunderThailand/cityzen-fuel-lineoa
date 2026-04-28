@@ -7,7 +7,7 @@ import Map, {
   GeolocateControl,
 } from "react-map-gl/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { Search, Filter, ChevronUp, Fuel } from "lucide-react";
+import { Search, Filter, ChevronUp, Fuel, ChevronLeft, MapPin } from "lucide-react";
 import StationCard from "@/components/map/StationCard";
 import StationDrawer from "@/components/map/StationDrawer";
 import StationListSheet from "@/components/map/StationListSheet";
@@ -138,27 +138,49 @@ export default function FuelMapPage() {
   return (
     <main className="relative h-dvh w-screen overflow-hidden bg-gray-50 flex flex-col">
       {/* 1. Header (Sticky) */}
-      <div className="absolute top-0 left-0 right-0 z-20 bg-white/90 backdrop-blur pb-2 pt-4 px-4 shadow-sm">
-        <h1 className="text-lg font-bold text-slate-800 text-center mb-3">
-          ⛽ แผนที่น้ำมัน
-        </h1>
-        <div className="flex gap-2">
-          <div className="flex-1 bg-white shadow-sm rounded-2xl flex items-center px-4 border border-gray-100">
-            <Search className="text-gray-400" size={18} />
+      <div className="absolute top-0 left-0 right-0 z-20 bg-white pb-2 pt-4 px-4 shadow-sm">
+        <div className="relative flex items-center justify-center mb-4">
+          <button onClick={() => window.history.back()} className="absolute left-0 p-1">
+            <ChevronLeft className="text-gray-600" size={24} />
+          </button>
+          <h1 className="text-[17px] font-medium text-gray-800">
+            แผนที่น้ำมัน
+          </h1>
+        </div>
+        
+        <div className="flex gap-2 mb-3">
+          <div className="flex-1 bg-white shadow-sm rounded-xl flex items-center px-3 border border-gray-200">
+            <MapPin className="text-gray-400" size={16} />
             <input
               type="text"
-              placeholder="ค้นหาปั๊ม / พื้นที่..."
-              className="w-full p-2.5 text-sm outline-none bg-transparent"
+              placeholder="ค้นหาปั๊มน้ำมัน"
+              className="w-full p-2.5 text-sm outline-none bg-transparent ml-1"
             />
+            <button
+              onClick={() => setIsFilterSheetOpen(true)}
+              className="p-1 relative active:scale-95 transition-transform"
+            >
+              <Filter size={16} className="text-gray-500" />
+              {(filters.fuels.length > 0 || filters.statuses.length > 0) && (
+                <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-red-500 rounded-full border border-white"></span>
+              )}
+            </button>
           </div>
-          <button
-            onClick={() => setIsFilterSheetOpen(true)}
-            className="bg-white shadow-sm rounded-2xl p-2.5 border border-gray-100 relative"
-          >
-            <Filter size={20} className="text-slate-700" />
-            {(filters.fuels.length > 0 || filters.statuses.length > 0) && (
-              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
-            )}
+        </div>
+
+        {/* Quick Fuel Filters */}
+        <div className="flex gap-2 overflow-x-auto pb-1 hide-scrollbar">
+          <button className="shrink-0 px-4 py-1.5 bg-[#34445c] text-white text-sm rounded-full border border-[#34445c]">
+            ทั้งหมด
+          </button>
+          <button className="shrink-0 px-4 py-1.5 bg-white text-gray-600 text-sm rounded-full border border-gray-200">
+            ดีเซล
+          </button>
+          <button className="shrink-0 px-4 py-1.5 bg-white text-gray-600 text-sm rounded-full border border-gray-200">
+            เบนซิน
+          </button>
+          <button className="shrink-0 px-4 py-1.5 bg-white text-gray-600 text-sm rounded-full border border-gray-200">
+            แก๊สโซฮอล์
           </button>
         </div>
       </div>
@@ -252,23 +274,18 @@ export default function FuelMapPage() {
       )}
 
       {/* 5. Bottom Filter Bar / Peek Sheet */}
-      <div className="absolute bottom-0 left-0 right-0 z-20">
-        <div className="bg-linear-to-t from-white via-white to-transparent pt-8 pb-4 px-4">
+      <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none">
+        <div className="bg-transparent pt-8 pointer-events-auto">
           {!selectedStation && (
             <button
               onClick={() => setIsListSheetOpen(true)}
-              className="w-full bg-white border border-gray-200 shadow-[0_-4px_24px_rgba(0,0,0,0.05)] rounded-2xl p-4 flex items-center justify-between active:bg-gray-50 transition-colors"
+              className="w-full bg-white rounded-t-[32px] pt-3 pb-8 px-6 flex flex-col items-center shadow-[0_-4px_24px_rgba(0,0,0,0.08)] transition-colors active:bg-gray-50"
             >
-              <div className="flex flex-col text-left">
-                <span className="text-xs text-gray-500 font-medium">
-                  มุมมองปัจจุบัน
+              <div className="w-12 h-1.5 rounded-full bg-gray-200 mb-4" />
+              <div className="w-full flex justify-start">
+                <span className="text-[15px] font-bold text-gray-900">
+                  ปั๊มใกล้เคียง
                 </span>
-                <span className="text-gray-900 font-bold">
-                  ปั๊มในบริเวณนี้ {filteredStations.length} จุด
-                </span>
-              </div>
-              <div className="w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center text-slate-600">
-                <ChevronUp size={20} />
               </div>
             </button>
           )}
