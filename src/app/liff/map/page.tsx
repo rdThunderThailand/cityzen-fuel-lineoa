@@ -7,7 +7,7 @@ import Map, {
   GeolocateControl,
 } from "react-map-gl/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { Search, Filter, ChevronUp } from "lucide-react";
+import { Search, Filter, ChevronUp, Fuel } from "lucide-react";
 import StationCard from "@/components/map/StationCard";
 import StationDrawer from "@/components/map/StationDrawer";
 import StationListSheet from "@/components/map/StationListSheet";
@@ -165,7 +165,7 @@ export default function FuelMapPage() {
 
       {/* 2. Map Canvas */}
       <div className="absolute inset-0 z-0 pt-28">
-        {mounted && (
+        {mounted && mapboxAccessToken && (
           <Map
             initialViewState={viewport}
             mapStyle="mapbox://styles/mapbox/light-v11"
@@ -176,25 +176,34 @@ export default function FuelMapPage() {
           >
             {filteredStations.map((s) => {
               const st = STATUS_MAP[s.status] ?? STATUS_MAP.available;
+              const isSelected = selectedStation?.id === s.id;
+              
               return (
                 <Marker
                   key={s.id}
                   latitude={s.latitude}
                   longitude={s.longitude}
-                  onClick={(e) => {
-                    e.originalEvent.stopPropagation();
-                    setSelectedStation(s);
-                  }}
-                  style={{ zIndex: selectedStation?.id === s.id ? 10 : 1 }}
+                  style={{ zIndex: isSelected ? 10 : 1 }}
+                  anchor="bottom"
                 >
-                  <div
-                    className={`relative group flex items-center justify-center cursor-pointer transition-transform duration-300 ${selectedStation?.id === s.id ? "scale-125" : "scale-100 hover:scale-110"}`}
-                  >
-                    <div
-                      className={`w-5 h-5 rounded-full border-[2.5px] border-white shadow-[0_2px_8px_rgba(0,0,0,0.15)] flex items-center justify-center ${st.dot}`}
-                    >
-                      <div className="w-1.5 h-1.5 bg-white rounded-full opacity-75" />
-                    </div>
+                  <div className={`relative transition-transform duration-300 ${isSelected ? "scale-110" : "scale-100"}`}>
+                    {isSelected ? (
+                      // Selected State: Pill badge
+                      <div className="flex flex-col items-center drop-shadow-lg -mb-2">
+                        <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full ${st.dot} text-white`}>
+                          <Fuel size={14} />
+                          <span className="text-xs font-bold whitespace-nowrap">{st.label}</span>
+                        </div>
+                        <div className={`w-3 h-3 ${st.dot} rotate-45 -mt-1.5`}></div>
+                      </div>
+                    ) : (
+                      // Unselected State: Teardrop pin
+                      <div className="flex flex-col items-center drop-shadow-md">
+                        <div className={`w-7 h-7 ${st.dot} rounded-full flex items-center justify-center rounded-br-none rotate-45 border-2 border-white`}>
+                          <div className="w-2.5 h-2.5 bg-white rounded-full shadow-inner" />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </Marker>
               );

@@ -2,7 +2,7 @@
 
 import { Drawer } from "vaul";
 import { FuelStatus, StationListSheetProps } from "@/types/fuel";
-import { MapPin, Navigation, Clock } from "lucide-react";
+import { MapPin, Navigation, Clock, CheckCircle2, AlertCircle, XCircle, Filter } from "lucide-react";
 
 const STATUS_MAP: Record<FuelStatus, { label: string; color: string; bg: string; dot: string }> = {
   available: { label: "มีบริการ", color: "text-green-700", bg: "bg-green-100", dot: "bg-green-500" },
@@ -11,20 +11,34 @@ const STATUS_MAP: Record<FuelStatus, { label: string; color: string; bg: string;
   out_of_service: { label: "ไม่มีบริการ", color: "text-red-700", bg: "bg-red-100", dot: "bg-red-500" },
 };
 
+const getStatusIcon = (status: FuelStatus) => {
+  if (status === "available") return <CheckCircle2 size={10} />;
+  if (status === "partial" || status === "limited") return <AlertCircle size={10} />;
+  return <XCircle size={10} />;
+};
+
 function formatDistance(meters: number) {
-  if (meters < 1000) return `${Math.round(meters)} ม.`;
-  return `${(meters / 1000).toFixed(1)} กม.`;
+  if (meters < 1000) return `ห่าง ${Math.round(meters)} ม.`;
+  return `ห่าง ${(meters / 1000).toFixed(1)} กม.`;
 }
 
 function timeAgo(dateStr: string) {
+  if (!dateStr) return "อัปเดตล่าสุด";
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "เมื่อสักครู่";
-  if (mins < 60) return `${mins} นาทีที่แล้ว`;
+  if (mins < 1) return "อัปเดตเมื่อสักครู่";
+  if (mins < 60) return `อัปเดต ${mins} นาที`;
   const hrs = Math.floor(mins / 60);
-  return `${hrs} ชั่วโมงที่แล้ว`;
+  return `อัปเดต ${hrs} ชั่วโมง`;
 }
 
+// Temporary placeholder images based on brand
+const getStationImage = (brand: string) => {
+  const b = (brand || "").toLowerCase();
+  if (b.includes("ปตท") || b.includes("ptt")) return "https://images.unsplash.com/photo-1563212036-7c3e5eb564e6?auto=format&fit=crop&q=80&w=200";
+  if (b.includes("บางจาก") || b.includes("bangchak")) return "https://images.unsplash.com/photo-1542345307-d86161a0b38c?auto=format&fit=crop&q=80&w=200";
+  return "https://images.unsplash.com/photo-1503698064437-059dcab39690?auto=format&fit=crop&q=80&w=200";
+};
 
 export default function StationListSheet({ stations, open, onOpenChange, onSelectStation }: StationListSheetProps) {
   return (
@@ -35,62 +49,69 @@ export default function StationListSheet({ stations, open, onOpenChange, onSelec
           {/* Drag handle */}
           <div className="mx-auto w-12 h-1.5 shrink-0 rounded-full bg-gray-200 my-4" />
           
-          <div className="px-6 pb-4">
-            <h2 className="text-xl font-extrabold text-gray-900">
-              ปั๊มในบริเวณนี้ ({stations.length})
+          <div className="px-6 pb-4 flex justify-between items-center border-b border-gray-100">
+            <h2 className="text-[15px] font-bold text-gray-900">
+              ปั๊มใกล้เคียง
             </h2>
-            <p className="text-sm text-gray-500 mt-1">
-              เรียงตาม: <span className="font-bold text-gray-800">ใกล้ที่สุด ▼</span>
-            </p>
+            <button className="flex items-center gap-1.5 bg-gray-100 text-gray-500 px-3 py-1.5 rounded-full text-[11px] font-medium active:scale-95 transition-transform">
+              <Filter size={12} />
+              ใกล้ที่สุด
+            </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-6 pb-8 space-y-4">
-            {stations.map((station) => {
+          <div className="flex-1 overflow-y-auto px-6 pb-8 space-y-4 pt-4">
+            {stations.map((station, index) => {
               const status = STATUS_MAP[station.status] ?? STATUS_MAP.available;
               const navUrl = `https://www.google.com/maps/search/?api=1&query=${station.latitude},${station.longitude}`;
 
               return (
                 <div 
                   key={station.id} 
-                  className="bg-white border text-left border-gray-100 shadow-sm rounded-2xl p-4 flex flex-col gap-3 active:scale-[0.98] transition-transform"
+                  className={`flex gap-3 active:scale-[0.98] transition-transform cursor-pointer pb-4 ${index !== stations.length - 1 ? 'border-b border-gray-100' : ''}`}
                   onClick={() => {
                     onOpenChange(false);
                     onSelectStation(station);
                   }}
                 >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-base font-bold text-gray-900 leading-tight">
+                  <img 
+                    src={getStationImage(station.brand)} 
+                    alt={station.name}
+                    className="w-[72px] h-[72px] rounded-xl object-cover shrink-0 border border-gray-100"
+                  />
+                  
+                  <div className="flex-1 flex flex-col justify-between">
+                    <div className="flex justify-between items-start">
+                      <h3 className="text-sm font-bold text-gray-900 leading-tight line-clamp-1 pr-2">
                         {station.name}
                       </h3>
-                      <div className="flex items-center gap-1.5 text-xs text-gray-500 mt-1">
-                        <MapPin size={12} className="text-blue-500" />
-                        {formatDistance(station.distance_meters)}
-                        <span className="text-gray-300">•</span>
-                        <span className="text-[11px] flex items-center gap-1">
-                           <Clock size={10} />
-                           {timeAgo(station.updated_at)}
-                        </span>
-                      </div>
+                      <span className={`shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${status.bg} ${status.color}`}>
+                        {getStatusIcon(station.status)}
+                        {status.label}
+                      </span>
                     </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between mt-1">
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold ${status.bg} ${status.color}`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${status.dot}`} />
-                      {status.label}
-                    </span>
                     
-                    <a
-                      href={navUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
-                      className="bg-slate-800 hover:bg-slate-700 text-white text-[11px] font-bold px-4 py-2 rounded-xl flex items-center gap-1.5 transition-colors"
-                    >
-                      <Navigation size={12} />
-                      นำทาง
-                    </a>
+                    <div className="flex items-center gap-1.5 text-[11px] text-gray-400 mt-0.5">
+                      <MapPin size={12} />
+                      {formatDistance(station.distance_meters)}
+                    </div>
+                    
+                    <div className="flex justify-between items-end mt-1">
+                      <div className="flex items-center gap-1.5 text-[11px] text-gray-400">
+                        <Clock size={12} />
+                        {timeAgo(station.updated_at)}
+                      </div>
+                      
+                      <a
+                        href={navUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="bg-[#34445c] hover:bg-[#2a3648] text-white text-[11px] font-medium px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors shadow-sm"
+                      >
+                        <Navigation size={12} />
+                        นำทาง
+                      </a>
+                    </div>
                   </div>
                 </div>
               );

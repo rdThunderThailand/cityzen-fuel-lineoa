@@ -21,6 +21,7 @@ export interface Station {
   fuels: string[]; // เช่น ['ดีเซล', '95']
   fuel_station: string;
   fuel_status?: StationFuelStatus[]; // Added to match data returned by API and used in webhook
+  station_code?: string; // รหัสปั๊มสำหรับ report
 }
 
 export interface FilterState {

@@ -136,6 +136,7 @@ export default function ReportPage() {
             onClick={() => {
               if (reportData.station) {
                 const targetUrl = `https://thundercore.vercel.app/r/${reportData.station.station_code}`;
+                console.log("targetUrl", targetUrl);
                 window.location.href = targetUrl;
               }
             }}
