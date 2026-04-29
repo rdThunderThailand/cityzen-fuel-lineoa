@@ -62,11 +62,11 @@ export default function StationCard({ station, onDetail, onReport }: StationCard
           {formatDistance(station.distance_meters)}
         </span>
 
-        {station.fuels.length > 0 && (
+        {station.fuels?.length > 0 && (
           <span className="text-xs text-gray-300">•</span>
         )}
 
-        {station.fuels.map((fuel) => (
+        {(station.fuels || []).map((fuel) => (
           <span
             key={fuel}
             className="px-2 py-0.5 rounded-md bg-gray-100 text-[11px] text-gray-600 font-medium"

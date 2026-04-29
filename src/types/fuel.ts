@@ -59,6 +59,13 @@ export interface StationDrawerProps {
   mode?: "detail" | "report";
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onReportClick?: () => void;
+}
+
+export interface ReportUpdateSheetProps {
+  station: Station | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 export interface StationListSheetProps {
@@ -66,4 +73,6 @@ export interface StationListSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSelectStation: (station: Station) => void;
+  selectedStation?: Station | null;
+  onDetail?: (station: Station) => void;
 }

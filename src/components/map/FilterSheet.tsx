@@ -53,7 +53,7 @@ export default function FilterSheet({ open, onOpenChange, filters, onApply }: Fi
           <div className="mx-auto w-12 h-1.5 shrink-0 rounded-full bg-gray-200 my-4" />
           
           <div className="px-6 pb-2">
-            <h2 className="text-xl font-extrabold text-gray-900">ตัวกรอง</h2>
+            <Drawer.Title className="text-xl font-extrabold text-gray-900">ตัวกรอง</Drawer.Title>
           </div>
 
           <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-6">

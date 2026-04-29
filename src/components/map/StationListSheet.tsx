@@ -40,36 +40,36 @@ const getStationImage = (brand: string) => {
   return "https://images.unsplash.com/photo-1503698064437-059dcab39690?auto=format&fit=crop&q=80&w=200";
 };
 
-export default function StationListSheet({ stations, open, onOpenChange, onSelectStation }: StationListSheetProps) {
+export default function StationListSheet({ stations, open, onOpenChange, onSelectStation, selectedStation, onDetail }: StationListSheetProps) {
   return (
     <Drawer.Root open={open} onOpenChange={onOpenChange}>
       <Drawer.Portal>
-        <Drawer.Overlay className="fixed inset-0 bg-black/20 z-40 backdrop-blur-sm" />
-        <Drawer.Content className="bg-white flex flex-col rounded-t-[32px] fixed bottom-0 left-0 right-0 z-50 h-[80vh] outline-none">
+        <Drawer.Overlay className="fixed inset-0 z-40" />
+        <Drawer.Content className="bg-white flex flex-col rounded-t-[32px] fixed bottom-0 left-0 right-0 z-50 h-[40vh] outline-none">
           {/* Drag handle */}
           <div className="mx-auto w-12 h-1.5 shrink-0 rounded-full bg-gray-200 my-4" />
           
           <div className="px-6 pb-4 flex justify-between items-center border-b border-gray-100">
-            <h2 className="text-[15px] font-bold text-gray-900">
+            <Drawer.Title className="text-[15px] font-bold text-gray-900">
               ปั๊มใกล้เคียง
-            </h2>
+            </Drawer.Title>
             <button className="flex items-center gap-1.5 bg-gray-100 text-gray-500 px-3 py-1.5 rounded-full text-[11px] font-medium active:scale-95 transition-transform">
               <Filter size={12} />
               ใกล้ที่สุด
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-6 pb-8 space-y-4 pt-4">
+          <div className="flex-1 overflow-y-auto pb-8 pt-4">
             {stations.map((station, index) => {
               const status = STATUS_MAP[station.status] ?? STATUS_MAP.available;
               const navUrl = `https://www.google.com/maps/search/?api=1&query=${station.latitude},${station.longitude}`;
+              const isSelected = selectedStation?.id === station.id;
 
               return (
                 <div 
                   key={station.id} 
-                  className={`flex gap-3 active:scale-[0.98] transition-transform cursor-pointer pb-4 ${index !== stations.length - 1 ? 'border-b border-gray-100' : ''}`}
+                  className={`flex gap-3 px-6 py-4 cursor-pointer transition-colors ${isSelected ? 'bg-[#eef5fd]' : ''} ${index !== stations.length - 1 && !isSelected ? 'border-b border-gray-100 mx-6 px-0' : ''}`}
                   onClick={() => {
-                    onOpenChange(false);
                     onSelectStation(station);
                   }}
                 >
@@ -101,16 +101,29 @@ export default function StationListSheet({ stations, open, onOpenChange, onSelec
                         {timeAgo(station.updated_at)}
                       </div>
                       
-                      <a
-                        href={navUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
-                        className="bg-[#34445c] hover:bg-[#2a3648] text-white text-[11px] font-medium px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors shadow-sm"
-                      >
-                        <Navigation size={12} />
-                        นำทาง
-                      </a>
+                      <div className="flex items-center gap-2">
+                        {isSelected && onDetail && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onDetail(station);
+                            }}
+                            className="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-[11px] font-bold px-3 py-1.5 rounded-lg transition-colors shadow-sm"
+                          >
+                            รายละเอียด
+                          </button>
+                        )}
+                        <a
+                          href={navUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="bg-[#34445c] hover:bg-[#2a3648] text-white text-[11px] font-medium px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors shadow-sm"
+                        >
+                          <Navigation size={12} />
+                          นำทาง
+                        </a>
+                      </div>
                     </div>
                   </div>
                 </div>

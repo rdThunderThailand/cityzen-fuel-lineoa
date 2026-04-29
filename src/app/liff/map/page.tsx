@@ -7,11 +7,19 @@ import Map, {
   GeolocateControl,
 } from "react-map-gl/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { Search, Filter, ChevronUp, Fuel, ChevronLeft, MapPin } from "lucide-react";
+import {
+  Search,
+  Filter,
+  ChevronUp,
+  Fuel,
+  ChevronLeft,
+  MapPin,
+} from "lucide-react";
 import StationCard from "@/components/map/StationCard";
 import StationDrawer from "@/components/map/StationDrawer";
 import StationListSheet from "@/components/map/StationListSheet";
 import FilterSheet from "@/components/map/FilterSheet";
+import ReportUpdateSheet from "@/components/map/ReportUpdateSheet";
 import { fetchNearbyStations } from "@/services/thunder-core";
 import { Station, FuelStatus, FilterState } from "@/types/fuel";
 
@@ -54,6 +62,7 @@ export default function FuelMapPage() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isListSheetOpen, setIsListSheetOpen] = useState(false);
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
+  const [isReportSheetOpen, setIsReportSheetOpen] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
     fuels: [],
     statuses: [],
@@ -70,13 +79,13 @@ export default function FuelMapPage() {
 
   useEffect(() => {
     fetch("https://citizen-server.vercel.app/api/mapbox-token")
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         if (data.token) {
           setMapboxAccessToken(data.token);
         }
       })
-      .catch(err => console.error("Failed to fetch mapbox token:", err));
+      .catch((err) => console.error("Failed to fetch mapbox token:", err));
   }, []);
 
   useEffect(() => {
@@ -140,14 +149,17 @@ export default function FuelMapPage() {
       {/* 1. Header (Sticky) */}
       <div className="absolute top-0 left-0 right-0 z-20 bg-white pb-2 pt-4 px-4 shadow-sm">
         <div className="relative flex items-center justify-center mb-4">
-          <button onClick={() => window.history.back()} className="absolute left-0 p-1">
+          <button
+            onClick={() => window.history.back()}
+            className="absolute left-0 p-1"
+          >
             <ChevronLeft className="text-gray-600" size={24} />
           </button>
           <h1 className="text-[17px] font-medium text-gray-800">
             แผนที่น้ำมัน
           </h1>
         </div>
-        
+
         <div className="flex gap-2 mb-3">
           <div className="flex-1 bg-white shadow-sm rounded-xl flex items-center px-3 border border-gray-200">
             <MapPin className="text-gray-400" size={16} />
@@ -199,7 +211,7 @@ export default function FuelMapPage() {
             {filteredStations.map((s) => {
               const st = STATUS_MAP[s.status] ?? STATUS_MAP.available;
               const isSelected = selectedStation?.id === s.id;
-              
+
               return (
                 <Marker
                   key={s.id}
@@ -208,20 +220,30 @@ export default function FuelMapPage() {
                   style={{ zIndex: isSelected ? 10 : 1 }}
                   anchor="bottom"
                 >
-                  <div className={`relative transition-transform duration-300 ${isSelected ? "scale-110" : "scale-100"}`}>
+                  <div
+                    className={`relative transition-transform duration-300 ${isSelected ? "scale-110" : "scale-100"}`}
+                  >
                     {isSelected ? (
                       // Selected State: Pill badge
-                      <div className="flex flex-col items-center drop-shadow-lg -mb-2">
-                        <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full ${st.dot} text-white`}>
+                      <div className="flex flex-col items-center drop-shadow-md pb-1.5 relative">
+                        <div
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full ${st.dot} text-white border-2 border-white relative z-10`}
+                        >
                           <Fuel size={14} />
-                          <span className="text-xs font-bold whitespace-nowrap">{st.label}</span>
+                          <span className="text-xs font-bold whitespace-nowrap">
+                            {st.label}
+                          </span>
                         </div>
-                        <div className={`w-3 h-3 ${st.dot} rotate-45 -mt-1.5`}></div>
+                        <div
+                          className={`w-3.5 h-3.5 ${st.dot} rotate-45 border-r-2 border-b-2 border-white absolute bottom-0.5 z-0`}
+                        ></div>
                       </div>
                     ) : (
                       // Unselected State: Teardrop pin
                       <div className="flex flex-col items-center drop-shadow-md">
-                        <div className={`w-7 h-7 ${st.dot} rounded-full flex items-center justify-center rounded-br-none rotate-45 border-2 border-white`}>
+                        <div
+                          className={`w-7 h-7 ${st.dot} rounded-full flex items-center justify-center rounded-br-none rotate-45 border-2 border-white`}
+                        >
                           <div className="w-2.5 h-2.5 bg-white rounded-full shadow-inner" />
                         </div>
                       </div>
@@ -262,7 +284,7 @@ export default function FuelMapPage() {
         </div>
       </div>
 
-      {/* 4. Overlay Station Card (Screen 3) */}
+      {/* 4. Overlay Station Card (Screen 3)
       {selectedStation && !isDrawerOpen && (
         <div className="absolute bottom-[90px] left-4 right-4 z-30 animate-in slide-in-from-bottom-4 fade-in duration-200">
           <StationCard
@@ -271,7 +293,7 @@ export default function FuelMapPage() {
             onReport={() => setIsDrawerOpen(true)}
           />
         </div>
-      )}
+      )} */}
 
       {/* 5. Bottom Filter Bar / Peek Sheet */}
       <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none">
@@ -297,13 +319,32 @@ export default function FuelMapPage() {
         station={selectedStation}
         mode="detail"
         open={isDrawerOpen}
-        onOpenChange={setIsDrawerOpen}
+        onOpenChange={(open) => {
+          setIsDrawerOpen(open);
+          if (!open) setSelectedStation(null);
+        }}
+        onReportClick={() => setIsReportSheetOpen(true)}
+      />
+
+      <ReportUpdateSheet
+        station={selectedStation}
+        open={isReportSheetOpen}
+        onOpenChange={setIsReportSheetOpen}
       />
 
       <StationListSheet
         stations={filteredStations}
         open={isListSheetOpen}
-        onOpenChange={setIsListSheetOpen}
+        onOpenChange={(open) => {
+          setIsListSheetOpen(open);
+          if (!open) setSelectedStation(null);
+        }}
+        selectedStation={selectedStation}
+        onDetail={(station) => {
+          setSelectedStation(station);
+          setIsListSheetOpen(false);
+          setIsDrawerOpen(true);
+        }}
         onSelectStation={(station) => {
           setSelectedStation(station);
           // Zoom to station could optionally be added here
