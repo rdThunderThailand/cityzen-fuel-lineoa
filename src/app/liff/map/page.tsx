@@ -8,11 +8,12 @@ import { fetchNearbyStations } from "@/services/thunder-core";
 import { FilterState, FuelStatus, Station } from "@/types/fuel";
 import { ChevronLeft, Filter, Fuel, MapPin } from "lucide-react";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import Map, {
   GeolocateControl,
   Marker,
   NavigationControl,
+  MapRef,
 } from "react-map-gl/mapbox";
 
 const STATUS_MAP: Record<
@@ -49,6 +50,8 @@ export default function FuelMapPage() {
   const [mounted, setMounted] = useState(false);
   const [stations, setStations] = useState<Station[]>([]);
   const [selectedStation, setSelectedStation] = useState<Station | null>(null);
+  
+  const mapRef = useRef<MapRef>(null);
 
   // UI States
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -224,6 +227,7 @@ export default function FuelMapPage() {
         )}
         {mounted && mapboxAccessToken && (
           <Map
+            ref={mapRef}
             initialViewState={viewport}
             mapStyle="mapbox://styles/mapbox/light-v11"
             mapboxAccessToken={mapboxAccessToken}
@@ -370,12 +374,19 @@ export default function FuelMapPage() {
         }}
         onSelectStation={(station) => {
           setSelectedStation(station);
-          // Zoom to station could optionally be added here
+          
+          // Animate map to station
+          mapRef.current?.flyTo({
+            center: [station.longitude, station.latitude],
+            zoom: 14.5,
+            duration: 800
+          });
+          
           setViewport((prev) => ({
             ...prev,
             latitude: station.latitude,
             longitude: station.longitude,
-            zoom: 14,
+            zoom: 14.5,
           }));
         }}
       />
