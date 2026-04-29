@@ -375,11 +375,12 @@ export default function FuelMapPage() {
         onSelectStation={(station) => {
           setSelectedStation(station);
           
-          // Animate map to station
+          // Animate map to station with padding to account for the bottom sheet
           mapRef.current?.flyTo({
             center: [station.longitude, station.latitude],
             zoom: 14.5,
-            duration: 800
+            duration: 800,
+            padding: { top: 0, bottom: window.innerHeight * 0.45, left: 0, right: 0 }
           });
           
           setViewport((prev) => ({
