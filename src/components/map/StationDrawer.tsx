@@ -127,6 +127,8 @@ export default function StationDrawer({
   const fuels = detailedStatus?.fuels || station.fuels || ["ดีเซล", "เบนซิน", "แก๊สโซฮอล์", "EV"]; // Placeholder fallback for design match
 
   const navUrl = `https://www.google.com/maps/search/?api=1&query=${station.latitude},${station.longitude}`;
+  const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+  const staticMapUrl = token ? `https://api.mapbox.com/styles/v1/mapbox/light-v11/static/pin-s+2563eb(${station.longitude},${station.latitude})/${station.longitude},${station.latitude},15,0/600x300@2x?access_token=${token}` : null;
 
   return (
     <Drawer.Root open={open} onOpenChange={onOpenChange}>
@@ -205,12 +207,18 @@ export default function StationDrawer({
               </div>
             </div>
 
-            {/* Map Placeholder */}
-            <div className="mx-4 bg-gray-200 rounded-2xl h-48 flex flex-col items-center justify-center text-gray-400 mb-8 border border-gray-100">
-              <div className="bg-white p-2 rounded-full mb-2 shadow-sm">
-                <MapPin size={24} className="text-gray-400" />
-              </div>
-              <span className="text-[11px] font-medium">แผนที่จะแสดงที่นี่</span>
+            {/* Map Preview */}
+            <div className="mx-4 bg-gray-200 rounded-2xl h-48 flex flex-col items-center justify-center text-gray-400 mb-8 border border-gray-100 overflow-hidden relative">
+              {staticMapUrl ? (
+                <img src={staticMapUrl} alt="Map Preview" className="w-full h-full object-cover" />
+              ) : (
+                <>
+                  <div className="bg-white p-2 rounded-full mb-2 shadow-sm">
+                    <MapPin size={24} className="text-gray-400" />
+                  </div>
+                  <span className="text-[11px] font-medium">แผนที่จะแสดงที่นี่</span>
+                </>
+              )}
             </div>
           </div>
 
