@@ -1,27 +1,19 @@
 // src/app/liff/map/page.tsx
 "use client";
-import { useState, useEffect, useMemo } from "react";
-import Map, {
-  Marker,
-  NavigationControl,
-  GeolocateControl,
-} from "react-map-gl/mapbox";
-import "mapbox-gl/dist/mapbox-gl.css";
-import {
-  Search,
-  Filter,
-  ChevronUp,
-  Fuel,
-  ChevronLeft,
-  MapPin,
-} from "lucide-react";
-import StationCard from "@/components/map/StationCard";
-import StationDrawer from "@/components/map/StationDrawer";
-import StationListSheet from "@/components/map/StationListSheet";
 import FilterSheet from "@/components/map/FilterSheet";
 import ReportUpdateSheet from "@/components/map/ReportUpdateSheet";
+import StationDrawer from "@/components/map/StationDrawer";
+import StationListSheet from "@/components/map/StationListSheet";
 import { fetchNearbyStations } from "@/services/thunder-core";
-import { Station, FuelStatus, FilterState } from "@/types/fuel";
+import { FilterState, FuelStatus, Station } from "@/types/fuel";
+import { ChevronLeft, Filter, Fuel, MapPin } from "lucide-react";
+import "mapbox-gl/dist/mapbox-gl.css";
+import { useEffect, useMemo, useState } from "react";
+import Map, {
+  GeolocateControl,
+  Marker,
+  NavigationControl,
+} from "react-map-gl/mapbox";
 
 const STATUS_MAP: Record<
   FuelStatus,
@@ -75,10 +67,18 @@ export default function FuelMapPage() {
     zoom: 12,
   });
 
-  const [mapboxAccessToken, setMapboxAccessToken] = useState<string>("");
+  const [mapboxAccessToken, setMapboxAccessToken] = useState<string>(
+    process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
+  );
   const [tokenError, setTokenError] = useState(false);
 
   useEffect(() => {
+    // If we already have the token from the environment variable, skip fetching
+    if (process.env.NEXT_PUBLIC_MAPBOX_TOKEN) {
+      return;
+    }
+
+    // Fallback to API if env var is missing
     fetch("https://citizen-server.vercel.app/api/mapbox-token")
       .then((res) => {
         if (!res.ok) throw new Error("Network response was not ok");
@@ -210,12 +210,16 @@ export default function FuelMapPage() {
       <div className="absolute inset-0 z-0 pt-28">
         {!mounted && !tokenError && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-100 z-10 pt-28">
-            <span className="text-gray-400 font-medium">กำลังโหลดแผนที่...</span>
+            <span className="text-gray-400 font-medium">
+              กำลังโหลดแผนที่...
+            </span>
           </div>
         )}
         {tokenError && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-100 z-10 pt-28">
-            <span className="text-red-500 font-medium">ไม่สามารถเชื่อมต่อแผนที่ได้ กรุณาลองใหม่อีกครั้ง</span>
+            <span className="text-red-500 font-medium">
+              ไม่สามารถเชื่อมต่อแผนที่ได้ กรุณาลองใหม่อีกครั้ง
+            </span>
           </div>
         )}
         {mounted && mapboxAccessToken && (
