@@ -75,17 +75,26 @@ export default function FuelMapPage() {
     zoom: 12,
   });
 
-  const [mapboxAccessToken, setMapboxAccessToken] = useState<string>();
+  const [mapboxAccessToken, setMapboxAccessToken] = useState<string>("");
+  const [tokenError, setTokenError] = useState(false);
 
   useEffect(() => {
     fetch("https://citizen-server.vercel.app/api/mapbox-token")
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error("Network response was not ok");
+        return res.json();
+      })
       .then((data) => {
         if (data.token) {
           setMapboxAccessToken(data.token);
+        } else {
+          setTokenError(true);
         }
       })
-      .catch((err) => console.error("Failed to fetch mapbox token:", err));
+      .catch((err) => {
+        console.error("Failed to fetch mapbox token:", err);
+        setTokenError(true);
+      });
   }, []);
 
   useEffect(() => {
@@ -145,7 +154,7 @@ export default function FuelMapPage() {
   };
 
   return (
-    <main className="relative h-dvh w-screen overflow-hidden bg-gray-50 flex flex-col">
+    <main className="fixed inset-0 overflow-hidden bg-gray-50 flex flex-col font-sans">
       {/* 1. Header (Sticky) */}
       <div className="absolute top-0 left-0 right-0 z-20 bg-white pb-2 pt-4 px-4 shadow-sm">
         <div className="relative flex items-center justify-center mb-4">
@@ -199,6 +208,16 @@ export default function FuelMapPage() {
 
       {/* 2. Map Canvas */}
       <div className="absolute inset-0 z-0 pt-28">
+        {!mounted && !tokenError && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-100 z-10 pt-28">
+            <span className="text-gray-400 font-medium">กำลังโหลดแผนที่...</span>
+          </div>
+        )}
+        {tokenError && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-100 z-10 pt-28">
+            <span className="text-red-500 font-medium">ไม่สามารถเชื่อมต่อแผนที่ได้ กรุณาลองใหม่อีกครั้ง</span>
+          </div>
+        )}
         {mounted && mapboxAccessToken && (
           <Map
             initialViewState={viewport}
@@ -271,7 +290,7 @@ export default function FuelMapPage() {
       </div>
 
       {/* 3. Status Legend - Collapsible */}
-      <div className="absolute top-[132px] left-4 z-10 bg-white/95 backdrop-blur p-2.5 rounded-xl border border-gray-100 shadow-sm">
+      <div className="absolute top-[170px] left-4 z-10 bg-white/95 backdrop-blur p-2.5 rounded-xl border border-gray-100 shadow-sm">
         <div className="flex flex-col gap-2">
           {Object.entries(STATUS_MAP).map(([key, st]) => (
             <div key={key} className="flex items-center gap-2">
